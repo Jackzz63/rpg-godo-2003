@@ -1,0 +1,136 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://cogs/host_advanced_popup.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/theme.tres" id="2"]
+[ext_resource type="StyleBox" path="res://resources/borders_texture.tres" id="3"]
+
+[ext_resource type="PackedScene" path="res://scenes/launcher_caption.tscn" id="launcher_caption"]
+[ext_resource type="PackedScene" path="res://scenes/launcher_button.tscn" id="launcher_button"]
+
+[node name="HostAdvancedPopup" type="Window"]
+canvas_item_default_texture_filter = 0
+title = "主机附加设置"
+size = Vector2i(520, 320)
+visible = false
+borderless = true
+unresizable = true
+transient = true
+exclusive = true
+theme = ExtResource("2")
+script = ExtResource("1")
+metadata/physical_ui_scale_root = true
+
+[node name="Background" type="Panel" parent="."]
+theme = ExtResource("2")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Border" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("3")
+
+[node name="Margin" type="MarginContainer" parent="."]
+theme = ExtResource("2")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Scroll" type="ScrollContainer" parent="Margin"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="Margin/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Title" parent="Margin/Scroll/Content" instance=ExtResource("launcher_caption")]
+layout_mode = 2
+text = "主机附加设置"
+horizontal_alignment = 1
+
+[node name="GlobalRow" type="HBoxContainer" parent="Margin/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GlobalPreset" type="CheckBox" parent="Margin/Scroll/Content/GlobalRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+
+[node name="Label" parent="Margin/Scroll/Content/GlobalRow" instance=ExtResource("launcher_caption")]
+layout_mode = 2
+text = "同步CU全局变量"
+
+horizontal_alignment = 0
+
+[node name="SoundsRow" type="HBoxContainer" parent="Margin/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SoundsPreset" type="CheckBox" parent="Margin/Scroll/Content/SoundsRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+
+[node name="Label" parent="Margin/Scroll/Content/SoundsRow" instance=ExtResource("launcher_caption")]
+layout_mode = 2
+text = "过滤CU联机无关音效"
+
+horizontal_alignment = 0
+
+[node name="ParametersPadding" type="MarginContainer" parent="Margin/Scroll/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 0
+
+[node name="Parameters" type="TextEdit" parent="Margin/Scroll/Content/ParametersPadding"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 128)
+layout_mode = 2
+wrap_mode = 1
+
+[node name="SaveError" type="Label" parent="Margin/Scroll/Content"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.65, 0.65, 1)
+autowrap_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Margin/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Confirm" parent="Margin/Scroll/Content/Actions" instance=ExtResource("launcher_button")]
+unique_name_in_owner = true
+design_minimum_size = Vector2(80, 32)
+footer_action = true
+layout_mode = 2
+
+caption_text = "保存"
+
+[node name="Cancel" parent="Margin/Scroll/Content/Actions" instance=ExtResource("launcher_button")]
+unique_name_in_owner = true
+design_minimum_size = Vector2(80, 32)
+footer_action = true
+layout_mode = 2
+caption_text = "取消"

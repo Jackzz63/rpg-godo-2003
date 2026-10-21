@@ -153,6 +153,9 @@ public:
 		(void)size;
 	}
 
+	// Complete queued device output without waiting on the game thread.
+	virtual bool FlushOutput() { return true; }
+
 	/**
 	 * Called when the synthesizer shall write data in a buffer.
 	 *

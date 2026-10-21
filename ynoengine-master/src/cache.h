@@ -64,6 +64,9 @@ namespace Cache {
 	/** @return the configured system bitmap, or nullptr if there is no system */
 	BitmapRef System(bool bg_preserve_transparent_color = false);
 
+	/** @return whether the configured system bitmap was loaded from a real image */
+	bool IsSystemGraphicValid(bool bg_preserve_transparent_color = false);
+
 	/** @return a black system graphic bitmap */
 	BitmapRef SysBlack();
 

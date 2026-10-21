@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cxbmv4cldqgdq"]
 
-[ext_resource type="Script" uid="uid://wcxva8qjb861" path="res://addons/easy_transitions/transition.gd" id="1_4g0o5"]
+[ext_resource type="Script" uid="uid://cefec73ndj21s" path="res://addons/easy_transitions/transition.gd" id="1_4g0o5"]
 [ext_resource type="Material" uid="uid://cs5577x8csfyn" path="res://addons/easy_transitions/autoload.tres" id="2_hwhcs"]
 [ext_resource type="Texture2D" uid="uid://dsk8gveexag6v" path="res://addons/easy_transitions/icon.png" id="3_jgs46"]
 

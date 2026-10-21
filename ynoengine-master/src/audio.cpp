@@ -64,7 +64,7 @@ EmptyAudio::EmptyAudio(const Game_ConfigAudio& cfg) : AudioInterface(cfg) {
 
 }
 
-AudioInterface::AudioInterface(const Game_ConfigAudio& cfg) : cfg(cfg) {
+AudioInterface::AudioInterface(const Game_ConfigAudio& cfg) : cfg(cfg), midi_global_volume(cfg.music_volume.Get()) {
 
 }
 
@@ -101,6 +101,7 @@ int AudioInterface::BGM_GetGlobalVolume() const {
 
 void AudioInterface::BGM_SetGlobalVolume(int volume) {
 	cfg.music_volume.Set(volume);
+	midi_global_volume.store(cfg.music_volume.Get(), std::memory_order_relaxed);
 }
 
 int AudioInterface::SE_GetGlobalVolume() const {

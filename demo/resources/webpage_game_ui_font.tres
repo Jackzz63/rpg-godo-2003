@@ -1,0 +1,21 @@
+[gd_resource type="FontVariation" format=3 uid="uid://gt5jisdqqded"]
+
+[ext_resource type="FontFile" uid="uid://dwau36nhebcvu" path="res://resources/JF-Dot-Shinonome12.ttf" id="1_jf"]
+[ext_resource type="FontFile" uid="uid://cpn8pt67tcy3h" path="res://resources/NotoSansSC-VF.ttf" id="2_noto"]
+[ext_resource type="FontFile" uid="uid://bqht06iott6po" path="res://resources/NotoSansKR-VF.ttf" id="3_noto_kr"]
+
+[sub_resource type="FontVariation" id="FontVariation_noto_regular"]
+base_font = ExtResource("2_noto")
+variation_opentype = {
+2003265652: 400.0
+}
+
+[sub_resource type="FontVariation" id="FontVariation_noto_kr_regular"]
+base_font = ExtResource("3_noto_kr")
+variation_opentype = {
+2003265652: 400.0
+}
+
+[resource]
+fallbacks = Array[Font]([SubResource("FontVariation_noto_regular"), SubResource("FontVariation_noto_kr_regular")])
+base_font = ExtResource("1_jf")

@@ -7,6 +7,8 @@
 #include "output.h"
 #include "pixel_format.h"
 
+#include <algorithm>
+
 #if SUPPORT_AUDIO
 #include "audio.h"
 #include "platform/godot/audio.h"
@@ -60,9 +62,27 @@ void GodotUi::UpdateDisplay() {
 	}
 }
 
+void GodotUi::SetScalingMode(ConfigEnum::ScalingMode mode) {
+	vcfg.scaling_mode.Set(mode);
+	NotifyVideoSettingsChanged();
+}
+
+void GodotUi::ToggleStretch() {
+	vcfg.stretch.Toggle();
+	NotifyVideoSettingsChanged();
+}
+
+void GodotUi::SetScreenScale(int scale) {
+	vcfg.screen_scale.Set(std::clamp(scale, 50, 150));
+	NotifyVideoSettingsChanged();
+}
+
 void GodotUi::vGetConfig(Game_ConfigVideo& cfg) const {
 	cfg.renderer.Lock("Godot (Software)");
+	cfg.scaling_mode.SetOptionVisible(true);
+	cfg.stretch.SetOptionVisible(true);
 	cfg.game_resolution.SetOptionVisible(true);
+	cfg.screen_scale.SetOptionVisible(true);
 }
 
 bool GodotUi::vChangeDisplaySurfaceResolution(int new_width, int new_height) {
@@ -113,6 +133,21 @@ void GodotUi::SetFrameCallback(FrameCallback cb) {
 	frame_callback_ = std::move(cb);
 }
 
+void GodotUi::SetVideoSettingsCallback(VideoSettingsCallback cb) {
+	video_settings_callback_ = std::move(cb);
+	NotifyVideoSettingsChanged();
+}
+
+void GodotUi::NotifyVideoSettingsChanged() {
+	if (video_settings_callback_) {
+		video_settings_callback_(
+			vcfg.scaling_mode.Get(),
+			vcfg.stretch.Get(),
+			vcfg.screen_scale.Get()
+		);
+	}
+}
+
 #if SUPPORT_AUDIO
 std::vector<int16_t> GodotUi::PullAudioFrames(int frame_count) {
 	if (auto* ga = dynamic_cast<GodotAudio*>(audio_.get())) {
@@ -123,5 +158,19 @@ std::vector<int16_t> GodotUi::PullAudioFrames(int frame_count) {
 
 int GodotUi::GetAudioSampleRate() const {
 	return GodotAudio::SAMPLE_RATE;
+}
+
+void GodotUi::SetNativeMidiMuted(bool muted) {
+	if (auto* ga = dynamic_cast<GodotAudio*>(audio_.get())) {
+		ga->SetNativeMidiMuted(muted);
+	}
+}
+
+void GodotUi::PullAudioFrames(int frame_count, std::vector<int16_t>& out) {
+	if (auto* ga = dynamic_cast<GodotAudio*>(audio_.get())) {
+		ga->PullFrames(frame_count, out);
+	} else {
+		out.clear();
+	}
 }
 #endif

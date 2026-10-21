@@ -1,0 +1,96 @@
+--- a/scene/gui/line_edit.cpp
++++ b/scene/gui/line_edit.cpp
+@@ -1520,6 +1520,22 @@
+ 
+ 			// Draw text.
+ 			ofs.y += TS->shaped_text_get_ascent(text_rid);
++			// Reuse the native shaped text, including IME composition. Draw the
++			// entire shadow before the foreground so adjacent glyphs cannot cover it.
++			if (theme_cache.shadow_enabled != 0 && !using_placeholder && theme_cache.font_shadow_color.a > 0) {
++				Vector2 shadow_ofs = ofs;
++				for (int i = 0; i < gl_size; i++) {
++					for (int j = 0; j < glyphs[i].repeat; j++) {
++						if (std::ceil(shadow_ofs.x) >= x_ofs && (shadow_ofs.x + glyphs[i].advance) <= ofs_max && glyphs[i].font_rid != RID()) {
++							TS->font_draw_glyph(glyphs[i].font_rid, ci, glyphs[i].font_size, shadow_ofs + Vector2(glyphs[i].x_off, glyphs[i].y_off) + Vector2(theme_cache.shadow_offset), glyphs[i].index, theme_cache.font_shadow_color);
++						}
++						shadow_ofs.x += glyphs[i].advance;
++					}
++					if (shadow_ofs.x >= ofs_max) {
++						break;
++					}
++				}
++			}
+ 			Color font_outline_color = theme_cache.font_outline_color;
+ 			int outline_size = theme_cache.font_outline_size;
+ 			if (outline_size > 0 && font_outline_color.a > 0) {
+@@ -3553,6 +3569,10 @@
+ 	BIND_THEME_ITEM(Theme::DATA_TYPE_COLOR, LineEdit, font_selected_color);
+ 	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_CONSTANT, LineEdit, font_outline_size, "outline_size");
+ 	BIND_THEME_ITEM(Theme::DATA_TYPE_COLOR, LineEdit, font_outline_color);
++	BIND_THEME_ITEM(Theme::DATA_TYPE_CONSTANT, LineEdit, shadow_enabled);
++	BIND_THEME_ITEM(Theme::DATA_TYPE_COLOR, LineEdit, font_shadow_color);
++	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_CONSTANT, LineEdit, shadow_offset.x, "shadow_offset_x");
++	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_CONSTANT, LineEdit, shadow_offset.y, "shadow_offset_y");
+ 	BIND_THEME_ITEM(Theme::DATA_TYPE_COLOR, LineEdit, font_placeholder_color);
+ 	BIND_THEME_ITEM(Theme::DATA_TYPE_CONSTANT, LineEdit, caret_width);
+ 	BIND_THEME_ITEM(Theme::DATA_TYPE_COLOR, LineEdit, caret_color);
+--- a/scene/gui/line_edit.h
++++ b/scene/gui/line_edit.h
+@@ -216,6 +216,9 @@
+ 		Color font_selected_color;
+ 		int font_outline_size;
+ 		Color font_outline_color;
++		int shadow_enabled = 0;
++		Color font_shadow_color;
++		Vector2i shadow_offset;
+ 		Color font_placeholder_color;
+ 		int caret_width = 0;
+ 		Color caret_color;
+--- a/scene/theme/default_theme.cpp
++++ b/scene/theme/default_theme.cpp
+@@ -424,6 +424,7 @@
+ 	theme->set_color("font_uneditable_color", "LineEdit", control_font_disabled_color);
+ 	theme->set_color("font_placeholder_color", "LineEdit", control_font_placeholder_color);
+ 	theme->set_color("font_outline_color", "LineEdit", Color(0, 0, 0));
++	theme->set_color("font_shadow_color", "LineEdit", Color(0, 0, 0, 0));
+ 	theme->set_color("caret_color", "LineEdit", control_font_hover_color);
+ 	theme->set_color("selection_color", "LineEdit", control_selection_color);
+ 	theme->set_color("clear_button_color", "LineEdit", control_font_color);
+@@ -431,6 +432,9 @@
+ 
+ 	theme->set_constant("minimum_character_width", "LineEdit", 4);
+ 	theme->set_constant("outline_size", "LineEdit", 0);
++	theme->set_constant("shadow_enabled", "LineEdit", 0);
++	theme->set_constant("shadow_offset_x", "LineEdit", 1);
++	theme->set_constant("shadow_offset_y", "LineEdit", 1);
+ 	theme->set_constant("caret_width", "LineEdit", 1);
+ 
+ 	theme->set_icon("clear", "LineEdit", icons["line_edit_clear"]);
+--- a/doc/classes/LineEdit.xml
++++ b/doc/classes/LineEdit.xml
+@@ -580,6 +580,9 @@
+ 		<theme_item name="font_uneditable_color" data_type="color" type="Color" default="Color(0.875, 0.875, 0.875, 0.5)">
+ 			Font color when editing is disabled.
+ 		</theme_item>
++		<theme_item name="font_shadow_color" data_type="color" type="Color" default="Color(0, 0, 0, 0)">
++			Color of the text shadow when [theme_item shadow_enabled] is nonzero. The shadow uses the native shaped text, including IME composition, but excludes the placeholder.
++		</theme_item>
+ 		<theme_item name="selection_color" data_type="color" type="Color" default="Color(0.5, 0.5, 0.5, 1)">
+ 			Color of the selection rectangle.
+ 		</theme_item>
+@@ -596,6 +599,15 @@
+ 		<theme_item name="font" data_type="font" type="Font">
+ 			Font used for the text.
+ 		</theme_item>
++		<theme_item name="shadow_enabled" data_type="constant" type="int" default="0">
++			Enables text shadows when nonzero. Disabled by default, even if a shadow color is set. Does not change text layout or input handling.
++		</theme_item>
++		<theme_item name="shadow_offset_x" data_type="constant" type="int" default="1">
++			Horizontal text shadow offset in pixels.
++		</theme_item>
++		<theme_item name="shadow_offset_y" data_type="constant" type="int" default="1">
++			Vertical text shadow offset in pixels.
++		</theme_item>
+ 		<theme_item name="font_size" data_type="font_size" type="int">
+ 			Font size of the [LineEdit]'s text.
+ 		</theme_item>

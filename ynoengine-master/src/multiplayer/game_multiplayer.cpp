@@ -203,6 +203,7 @@ void Game_Multiplayer::InitConnection() {
 	});
 	connection.RegisterHandler<SyncServerVariablePacket>("ssv", [this] (SyncServerVariablePacket& p) {
 		if (!Player::IsCollectiveUnconscious()) return;
+		server_global_variables_active = true;
 		map_server_variables[p.var_id] = p.value;
 	});
 	connection.RegisterHandler<SyncEventPacket>("sev", [this] (SyncEventPacket& p) {
@@ -462,6 +463,7 @@ void Game_Multiplayer::InitConnection() {
 	});
 	connection.RegisterHandler<CUTimePacket>("cut", [this] (CUTimePacket& p) {
 		if (!Player::IsCollectiveUnconscious()) return;
+		server_global_variables_active = true;
 		const int raw_time = p.time;
 		if (raw_time > 0 && (raw_time < CUTimeFormat::HOURS * CUTimeFormat::DAYS)) {
 			cu_time_hours = raw_time % CUTimeFormat::HOURS;
@@ -477,6 +479,7 @@ void Game_Multiplayer::InitConnection() {
 	});
 	connection.RegisterHandler<CUWeatherPacket>("cuw", [this] (CUWeatherPacket& p) {
 		if (!Player::IsCollectiveUnconscious()) return;
+		server_global_variables_active = true;
 		if (!(p.temperature >= -100 && p.temperature <= 100) || !(p.precipitation >= 0 && p.precipitation <= 100)) return;
 
 		cu_temperature = p.temperature;
@@ -498,8 +501,7 @@ void Game_Multiplayer::Connect(int map_id, bool room_switch) {
 	if (room_switch) {
 		switched_room = false;
 	}
-	Initialize();
-	dc_players.clear();
+	ClearRemotePlayersImmediate();
 	if (connection.IsConnected()) {
 		session_connected = true;
 		connection.SendPacketAsync<Messages::C2S::SwitchRoomPacket>(room_id);
@@ -516,7 +518,17 @@ void Game_Multiplayer::Connect(int map_id, bool room_switch) {
 
 void Game_Multiplayer::Initialize() {
 	session_connected = false;
+	server_global_variables_active = false;
+	ClearRemotePlayerObjectsImmediate();
 
+	sync_switches.clear();
+	sync_vars.clear();
+	sync_events.clear();
+	sync_action_events.clear();
+	sync_picture_names.clear();
+}
+
+void Game_Multiplayer::ClearRemotePlayerObjectsImmediate() {
 	auto scene_map = Scene::Find(Scene::SceneType::Map);
 	if (scene_map && (!players.empty() || !dc_players.empty())) {
 		auto& dlist = scene_map->GetDrawableList();
@@ -537,21 +549,21 @@ void Game_Multiplayer::Initialize() {
 	}
 
 	players.clear();
-	sync_switches.clear();
-	sync_vars.clear();
-	sync_events.clear();
-	sync_action_events.clear();
-	sync_picture_names.clear();
+	dc_players.clear();
 	ResetRepeatingFlash();
 	if (Main_Data::game_pictures) {
 		Main_Data::game_pictures->EraseAllMultiplayer();
 	}
 }
 
+void Game_Multiplayer::ClearRemotePlayersImmediate() {
+	Initialize();
+}
+
 void Game_Multiplayer::Quit() {
 	Web_API::UpdateConnectionStatus(0); // disconnected
 	connection.Close();
-	Initialize();
+	ClearRemotePlayersImmediate();
 	UpdateGlobalVariables();
 }
 
@@ -828,6 +840,7 @@ void Game_Multiplayer::ApplyScreenTone() {
 }
 
 void Game_Multiplayer::UpdateNBPlayers() {
+	if (!server_global_variables_active) return;
 	if (!Player::IsCollectiveUnconscious()) return;
 	if (!Main_Data::game_variables) return;
 	Main_Data::game_variables->Set(GlobalVariables::NB_PLAYERS, players.size() + 1);
@@ -849,6 +862,7 @@ void Game_Multiplayer::UpdateCUWeather() {
 }
 
 void Game_Multiplayer::UpdateGlobalVariables() {
+	if (!server_global_variables_active) return;
 	UpdateNBPlayers();
   UpdateCUTime();
   UpdateCUWeather();
@@ -1008,6 +1022,19 @@ void Game_Multiplayer::GodotMpAddPlayer(
 		Output::Warning("GodotMpAddPlayer: no Map scene active — cannot spawn player id={}", id);
 		return;
 	}
+	const int map_width = Game_Map::GetTilesX();
+	const int map_height = Game_Map::GetTilesY();
+	if (map_width <= 0 || map_height <= 0) {
+		Output::Warning("GodotMpAddPlayer: invalid map dimensions {}x{} — cannot spawn player id={}", map_width, map_height, id);
+		return;
+	}
+
+	const int cx = Utils::Clamp(x, 0, map_width - 1);
+	const int cy = Utils::Clamp(y, 0, map_height - 1);
+	const int clamped_sprite_index = Utils::Clamp(sprite_index, 0, 7);
+	const int clamped_facing = Utils::Clamp(facing, 0, 3);
+	const int clamped_speed = Utils::Clamp(speed, 1, 6);
+
 	if (players.find(id) == players.end())
 		SpawnOtherPlayer(id);
 	auto& ch = players[id].ch;
@@ -1015,13 +1042,13 @@ void Game_Multiplayer::GodotMpAddPlayer(
 		Output::Warning("GodotMpAddPlayer: ch is null after SpawnOtherPlayer for id={}", id);
 		return;
 	}
-	ch->SetX(x);
-	ch->SetY(y);
+	ch->SetX(cx);
+	ch->SetY(cy);
 	if (!sprite_name.empty())
-		ch->SetSpriteGraphic(sprite_name, sprite_index);
-	ch->SetFacing(facing);
-	ch->SetMoveSpeed(speed);
-	players[id].mvq.emplace_back(x, y);
+		ch->SetSpriteGraphic(sprite_name, clamped_sprite_index);
+	ch->SetFacing(clamped_facing);
+	ch->SetMoveSpeed(clamped_speed);
+	players[id].mvq.emplace_back(cx, cy);
 }
 
 void Game_Multiplayer::GodotMpRemovePlayer(int id) {
@@ -1051,10 +1078,34 @@ void Game_Multiplayer::GodotMpMovePlayer(int id, int x, int y) {
 		Output::Debug("GodotMpMovePlayer: player id={} not found", id);
 		return;
 	}
-	int cx = Utils::Clamp(x, 0, Game_Map::GetTilesX() - 1);
-	int cy = Utils::Clamp(y, 0, Game_Map::GetTilesY() - 1);
+	if (!Scene::Find(Scene::SceneType::Map)) {
+		return;
+	}
+	const int map_width = Game_Map::GetTilesX();
+	const int map_height = Game_Map::GetTilesY();
+	if (map_width <= 0 || map_height <= 0) {
+		return;
+	}
+	int cx = Utils::Clamp(x, 0, map_width - 1);
+	int cy = Utils::Clamp(y, 0, map_height - 1);
 	players[id].mvq.emplace_back(cx, cy);
 	Output::Debug("GodotMpMovePlayer: id={} queued ({},{})  qsize={}", id, cx, cy, players[id].mvq.size());
+}
+
+void Game_Multiplayer::GodotMpJumpPlayer(int id, int x, int y) {
+	auto it = players.find(id);
+	if (it == players.end() || !Scene::Find(Scene::SceneType::Map)) return;
+	const int map_width = Game_Map::GetTilesX();
+	const int map_height = Game_Map::GetTilesY();
+	if (map_width <= 0 || map_height <= 0) return;
+	auto& ch = it->second.ch;
+	// Match YNO's JumpPacket handler: absolute destination, immediate Jump,
+	// and the existing stop-count policy. Do not queue or force busy actors.
+	const int cx = Utils::Clamp(x, 0, map_width - 1);
+	const int cy = Utils::Clamp(y, 0, map_height - 1);
+	if (ch->Jump(cx, cy)) {
+		ch->SetMaxStopCount(ch->GetMaxStopCountForStep(ch->GetMoveFrequency()));
+	}
 }
 
 void Game_Multiplayer::GodotMpSetFacing(int id, int facing) {

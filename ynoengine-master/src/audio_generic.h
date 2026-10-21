@@ -63,6 +63,7 @@ public:
 	void vGetConfig(Game_ConfigAudio&) const override {}
 
 	GenericAudioMidiOut* CreateAndGetMidiOut() override;
+	void SetNativeMidiMuted(bool muted);
 
 	void SetFormat(int frequency, AudioDecoder::Format format, int channels);
 
@@ -118,6 +119,7 @@ private:
 	std::vector<float> mixer_buffer = {};
 
 	std::unique_ptr<GenericAudioMidiOut> midi_thread;
+	bool native_midi_muted = false;
 };
 
 #endif

@@ -754,8 +754,15 @@ elseif(PLAYER_TARGET_PLATFORM STREQUAL "godot")
 	target_sources(${PROJECT_NAME} PRIVATE
 		src/platform/godot/ui.cpp
 		src/platform/godot/ui.h
+		src/platform/godot/audio.cpp
 		src/platform/godot/audio.h
 	)
+	if(ANDROID)
+		target_sources(${PROJECT_NAME} PRIVATE
+			src/platform/android/android.cpp
+			src/platform/android/android.h)
+		target_include_directories(${PROJECT_NAME} PRIVATE src/platform/android)
+	endif()
 	set(PLAYER_BUILD_EXECUTABLE OFF)
 else()
 	message(FATAL_ERROR "Invalid target platform")

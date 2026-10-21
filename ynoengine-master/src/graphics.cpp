@@ -42,6 +42,8 @@ namespace Graphics {
 	std::unique_ptr<FpsOverlay> fps_overlay;
 
 	std::string window_title_key;
+	bool last_draw_fps = false;
+	int last_speed_mod = 1;
 }
 
 void Graphics::Init() {
@@ -50,6 +52,8 @@ void Graphics::Init() {
 
 	message_overlay = std::make_unique<MessageOverlay>();
 	fps_overlay = std::make_unique<FpsOverlay>();
+	last_draw_fps = false;
+	last_speed_mod = 1;
 }
 
 void Graphics::Quit() {
@@ -62,13 +66,18 @@ void Graphics::Quit() {
 	Scene::Pop();
 }
 
-void Graphics::Update() {
-	fps_overlay->SetDrawFps(DisplayUi->RenderFps());
-
-	//Update Graphics:
-	if (fps_overlay->Update()) {
+bool Graphics::Update() {
+	const bool draw_fps = DisplayUi->RenderFps();
+	const int speed_mod = static_cast<int>(Game_Clock::GetGameSpeedFactor());
+	const bool visual_change = draw_fps != last_draw_fps || speed_mod != last_speed_mod;
+	last_draw_fps = draw_fps;
+	last_speed_mod = speed_mod;
+	fps_overlay->SetDrawFps(draw_fps);
+	const bool text_changed = fps_overlay->Update();
+	if (text_changed) {
 		UpdateTitle();
 	}
+	return visual_change || (draw_fps && text_changed);
 }
 
 void Graphics::UpdateTitle() {

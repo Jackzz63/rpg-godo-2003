@@ -1,0 +1,38 @@
+--- a/platform/android/java/lib/src/main/java/org/godotengine/godot/gl/GLSurfaceView.java
++++ b/platform/android/java/lib/src/main/java/org/godotengine/godot/gl/GLSurfaceView.java
+@@ -1416,8 +1416,9 @@
+ 								}
+ 							}
+ 
+-							// Have we lost the SurfaceView surface?
+-							if ((! mHasSurface) && (! mWaitingForSurface)) {
++							// A destroy/create pair can arrive while the render thread is busy
++							// initializing. Consume the loss even if a new surface already exists.
++							if (mSurfaceLossPending || ((! mHasSurface) && (! mWaitingForSurface))) {
+ 								if (LOG_SURFACE) {
+ 									Log.i("GLThread", "noticed surfaceView surface lost tid=" + getId());
+ 								}
+@@ -1426,6 +1427,7 @@
+ 								}
+ 								mWaitingForSurface = true;
+ 								mSurfaceIsBad = false;
++								mSurfaceLossPending = false;
+ 								sGLThreadManager.notifyAll();
+ 							}
+ 
+@@ -1745,6 +1747,7 @@
+ 					Log.i("GLThread", "surfaceDestroyed tid=" + getId());
+ 				}
+ 				mHasSurface = false;
++				mSurfaceLossPending = true;
+ 				sGLThreadManager.notifyAll();
+ 			}
+ 		}
+@@ -1851,6 +1854,7 @@
+ 		private boolean mRequestPaused;
+ 		private boolean mPaused;
+ 		private boolean mHasSurface;
++		private boolean mSurfaceLossPending;
+ 		private boolean mSurfaceIsBad;
+ 		private boolean mWaitingForSurface;
+ 		private boolean mHaveEglContext;

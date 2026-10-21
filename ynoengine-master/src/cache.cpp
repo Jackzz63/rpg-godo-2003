@@ -74,6 +74,7 @@ namespace {
 	struct CacheItem {
 		BitmapRef bitmap;
 		Game_Clock::time_point last_access;
+		bool is_fallback = false;
 	};
 
 	using key_type = std::string;
@@ -130,7 +131,7 @@ namespace {
 #endif
 	}
 
-	BitmapRef AddToCache(const std::string& key, BitmapRef bmp) {
+	BitmapRef AddToCache(const std::string& key, BitmapRef bmp, bool is_fallback = false) {
 		if (bmp) {
 			cache_size += bmp->GetSize();
 #ifdef CACHE_DEBUG
@@ -138,7 +139,7 @@ namespace {
 #endif
 		}
 
-		return (cache[key] = {bmp, Game_Clock::GetFrameTime()}).bitmap;
+		return (cache[key] = {bmp, Game_Clock::GetFrameTime(), is_fallback}).bitmap;
 	}
 
 	struct Material {
@@ -247,12 +248,14 @@ namespace {
 		//assert(req != nullptr && req->IsReady());
 
 		BitmapRef bmp;
+		bool is_fallback = false;
 
 		const auto key = MakeHashKey(s.directory, filename, transparent, extra_flags);
 		auto it = cache.find(key);
 		if (it == cache.end()) {
 			if (filename == CACHE_DEFAULT_BITMAP) {
 				bmp = LoadDummyBitmap<T>(s.directory, filename, true);
+				is_fallback = true;
 			}
 
 			if (!bmp) {
@@ -292,9 +295,10 @@ namespace {
 			if (!bmp) {
 				// Even for images without "warn_missing" this still creates a checkboard for invalid images
 				bmp = LoadDummyBitmap<T>(s.directory, filename, transparent);
+				is_fallback = true;
 			}
 
-			bmp = AddToCache(key, bmp);
+			bmp = AddToCache(key, bmp, is_fallback);
 		} else {
 			it->second.last_access = Game_Clock::GetFrameTime();
 			bmp = it->second.bitmap;
@@ -570,6 +574,21 @@ BitmapRef Cache::System(bool bg_preserve_transparent_color) {
 	} else {
 		return nullptr;
 	}
+}
+
+bool Cache::IsSystemGraphicValid(bool bg_preserve_transparent_color) {
+	if (system_name.empty()) {
+		return false;
+	}
+
+	uint32_t flags = 0;
+	if (bg_preserve_transparent_color || Player::IsRPG2k()) {
+		flags = Bitmap::Flag_SystemBgPreserveColor;
+	}
+	const auto key = MakeHashKey("System", system_name, true, flags);
+	Cache::System(system_name, bg_preserve_transparent_color);
+	const auto it = cache.find(key);
+	return it != cache.end() && it->second.bitmap && !it->second.is_fallback;
 }
 
 BitmapRef Cache::SysBlack() {

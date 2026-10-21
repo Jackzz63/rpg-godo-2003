@@ -28,13 +28,13 @@ private:
 	BitmapRef sys_graphic;
 	BitmapRef effects_img;
 	std::shared_ptr<int> request_id;
-	bool transparent;
+	bool transparent = false;
 	int base_opacity = 32;
 	bool dirty = true;
-	bool effects_dirty;
-	Game_Multiplayer::NametagMode nametag_mode_cache;
-	int flash_frames_left;
-	int last_valid_sprite_y_offset;
+	bool effects_dirty = true;
+	Game_Multiplayer::NametagMode nametag_mode_cache = Game_Multiplayer::NametagMode::CLASSIC;
+	int flash_frames_left = 0;
+	int last_valid_sprite_y_offset = -13;
 	
 	void SetBaseOpacity(int val);
 	int GetOpacity();

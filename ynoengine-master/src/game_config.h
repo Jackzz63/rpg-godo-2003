@@ -41,6 +41,8 @@ namespace ConfigEnum {
 		Integer,
 		/** Integer followed by Bilinear downscale to fit screen */
 		Bilinear,
+		/** Pixel-footprint filtering for sharp arbitrary scaling */
+		SharpPixel,
 	};
 
 	enum class GameResolution {
@@ -123,10 +125,17 @@ struct Game_ConfigVideo {
 		Utils::MakeSvArray("Do not show the FPS counter", "Show the FPS counter", "Always show the FPS counter inside the window")};
 	RangeConfigParam<int> fps_limit{ "Frame Limiter", "Toggle the frames per second limit (Recommended: 60)", "Video", "FpsLimit", DEFAULT_FPS, 0, 99999 };
 	ConfigParam<int> window_zoom{ "Window Zoom", "Toggle the window zoom level", "Video", "WindowZoom", 2 };
+#if defined(PLAYER_TARGET_GODOT)
+	EnumConfigParam<ConfigEnum::ScalingMode, 4> scaling_mode{ "Scaling method", "How the output is scaled", "Video", "ScalingMode", ConfigEnum::ScalingMode::Nearest,
+		Utils::MakeSvArray("Nearest", "Integer", "Bilinear", "SharpPixel"),
+		Utils::MakeSvArray("nearest", "integer", "bilinear", "sharppixel"),
+		Utils::MakeSvArray("Scale to screen size (Causes scaling artifacts)", "Scale to multiple of the game resolution", "Like Nearest, but output is blurred to avoid artifacts", "An improved and newer version of Nearest")};
+#else
 	EnumConfigParam<ConfigEnum::ScalingMode, 3> scaling_mode{ "Scaling method", "How the output is scaled", "Video", "ScalingMode", ConfigEnum::ScalingMode::Nearest,
 		Utils::MakeSvArray("Nearest", "Integer", "Bilinear"),
 		Utils::MakeSvArray("nearest", "integer", "bilinear"),
 		Utils::MakeSvArray("Scale to screen size (Causes scaling artifacts)", "Scale to multiple of the game resolution", "Like Nearest, but output is blurred to avoid artifacts")};
+#endif
 	BoolConfigParam stretch{ "Stretch", "Stretch to the width of the window/screen", "Video", "Stretch", false };
 	BoolConfigParam pause_when_focus_lost{ "Pause when focus lost", "Pause the program when it is in the background", "Video", "PauseWhenFocusLost", true };
 	BoolConfigParam touch_ui{ "Touch Ui", "Display the touch ui", "Video", "TouchUi", true };
@@ -134,6 +143,7 @@ struct Game_ConfigVideo {
 		Utils::MakeSvArray("Original (Recommended)", "Widescreen (Experimental)", "Ultrawide (Experimental)"),
 		Utils::MakeSvArray("original", "widescreen", "ultrawide"),
 		Utils::MakeSvArray("The default resolution (320x240, 4:3)", "Can cause glitches (416x240, 16:9)", "Can cause glitches (560x240, 21:9)")};
+	RangeConfigParam<int> screen_scale{ "Scaling", "Adjust screen scaling (Overscan/Underscan)", "Video", "ScreenScale", 100, 50, 150 };
 
 	// These are never shown and are used to restore the window to the previous position
 	ConfigParam<int> window_x{ "", "", "Video", "WindowX", -1 };

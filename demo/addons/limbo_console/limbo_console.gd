@@ -14,6 +14,7 @@ const CommandHistory := preload("res://addons/limbo_console/command_history.gd")
 const HistoryGui := preload("res://addons/limbo_console/history_gui.gd")
 
 const MAX_SUBCOMMANDS: int = 4
+const MAX_OUTPUT_LINES: int = 10_000
 
 ## If false, prevents console from being shown. Commands can still be executed from code.
 var enabled: bool = true:
@@ -72,6 +73,7 @@ func _init() -> void:
 	_history = CommandHistory.new()
 	if _options.persist_history:
 		_history.load()
+		_history.trim(_options.history_lines)
 	_history_iter = _history.create_iterator()
 
 	_build_gui()
@@ -151,7 +153,12 @@ func _handle_history_input(p_event: InputEvent):
 
 
 func _input(p_event: InputEvent) -> void:
-	if p_event.is_action_pressed("limbo_console_toggle"):
+	if not _control.visible and _is_external_text_input_focused():
+		return
+	var toggle_requested := p_event.is_action_pressed("limbo_console_toggle")
+	if not toggle_requested:
+		toggle_requested = _is_console_ime_close_key(p_event)
+	if toggle_requested:
 		toggle_console()
 		get_viewport().set_input_as_handled()
 	# Check to see if the history gui should open
@@ -162,6 +169,30 @@ func _input(p_event: InputEvent) -> void:
 		_handle_history_input(p_event)
 	elif _control.visible and p_event is InputEventKey and p_event.is_pressed():
 		_handle_command_input(p_event)
+
+
+func _is_external_text_input_focused() -> bool:
+	var focus_owner := get_viewport().gui_get_focus_owner()
+	if focus_owner is LineEdit or focus_owner is TextEdit:
+		return true
+	var chat_input := get_tree().get_first_node_in_group("rpg_godo_chat_input") as Control
+	return is_instance_valid(chat_input) and chat_input.is_visible_in_tree()
+
+
+func _is_console_ime_close_key(p_event: InputEvent) -> bool:
+	if not _is_open or not p_event is InputEventKey:
+		return false
+	var key_event := p_event as InputEventKey
+	if not key_event.is_pressed() or key_event.echo:
+		return false
+	if key_event.alt_pressed or key_event.ctrl_pressed \
+			or key_event.meta_pressed or key_event.shift_pressed:
+		return false
+	return key_event.physical_keycode == KEY_QUOTELEFT \
+			or key_event.keycode == KEY_QUOTELEFT \
+			or key_event.key_label == KEY_QUOTELEFT \
+			or key_event.unicode == 0x60 \
+			or key_event.unicode == 0xB7
 
 
 func _process(delta: float) -> void:
@@ -207,6 +238,15 @@ func close_console() -> void:
 
 func is_open() -> bool:
 	return _is_open
+
+
+func set_game_output_rect(game_rect: Rect2) -> void:
+	if not is_instance_valid(_control):
+		return
+	_control.anchor_left = 0.0
+	_control.anchor_right = 0.0
+	_control.offset_left = game_rect.position.x
+	_control.offset_right = game_rect.end.x
 
 
 func toggle_console() -> void:
@@ -262,7 +302,9 @@ func debug(p_line: String) -> void:
 func print_line(p_line: String, p_stdout: bool = _options.print_to_stdout) -> void:
 	if _silent:
 		return
-	_output.text += p_line + "\n"
+	_output.append_text(p_line + "\n")
+	while _output.get_paragraph_count() > MAX_OUTPUT_LINES + 1:
+		_output.remove_paragraph(0)
 	if p_stdout:
 		print(Util.bbcode_strip(p_line))
 
@@ -397,6 +439,7 @@ func execute_command(p_command_line: String, p_silent: bool = false) -> void:
 	if not p_silent:
 		var history_line: String = " ".join(argv)
 		_history.push_entry(history_line)
+		_history.trim(_options.history_lines)
 		info("[color=%s][b]>[/b] %s[/color] %s" %
 				[_output_command_color.to_html(), argv[0], " ".join(argv.slice(1))])
 

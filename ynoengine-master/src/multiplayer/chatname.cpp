@@ -8,7 +8,32 @@
 #include "../game_playerother.h"
 #include "playerother.h"
 
-std::map<std::string, std::array<int, 96>> sprite_y_offsets;
+namespace {
+	constexpr int BASE_OFFSET = -13;
+	constexpr size_t FRAMES_PER_CHARACTER = 12;
+	constexpr size_t SPRITE_Y_OFFSET_COUNT = 96;
+	static_assert(SPRITE_Y_OFFSET_COUNT % FRAMES_PER_CHARACTER == 0);
+
+	constexpr bool CanScanSpriteYOffsetLayout(int rows, int columns) {
+		if (rows <= 0 || columns <= 0) {
+			return true;
+		}
+
+		// The cache index reserves four character columns per row.
+		const size_t last_cell = static_cast<size_t>(rows - 1) * 4
+			+ static_cast<size_t>(columns - 1);
+		return last_cell < SPRITE_Y_OFFSET_COUNT / FRAMES_PER_CHARACTER;
+	}
+
+	static_assert(CanScanSpriteYOffsetLayout(2, 4));
+	static_assert(CanScanSpriteYOffsetLayout(1, 8));
+	static_assert(CanScanSpriteYOffsetLayout(0, 100));
+	static_assert(!CanScanSpriteYOffsetLayout(2, 5));
+	static_assert(!CanScanSpriteYOffsetLayout(1, 9));
+	static_assert(!CanScanSpriteYOffsetLayout(3, 1));
+}
+
+std::map<std::string, std::array<int, SPRITE_Y_OFFSET_COUNT>> sprite_y_offsets;
 
 ChatName::ChatName(int id, PlayerOther& player, std::string nickname)
 	:player(player),
@@ -112,61 +137,73 @@ int ChatName::GetOpacity() {
 
 int ChatName::GetSpriteYOffset() {
 	std::string sprite_name = player.ch->GetSpriteName();
-	if (!sprite_y_offsets.count(sprite_name)) {
+	auto offsets_it = sprite_y_offsets.find(sprite_name);
+	if (offsets_it == sprite_y_offsets.end()) {
 		auto filename = FileFinder::FindImage("CharSet", sprite_name);
 		if (filename == "") {
 			return 0;
 		}
 
-		auto offset_array = std::array<int, 96>{ 0 };
-
-		const int BASE_OFFSET = -13;
+		auto offset_array = std::array<int, SPRITE_Y_OFFSET_COUNT>{ 0 };
 		const size_t BGRA = 4;
 
 		auto image = Cache::Charset(sprite_name);
+		const int rows = image->height() / 128;
+		const int columns = image->width() / 72;
+		const bool has_cells = rows > 0 && columns > 0;
 
-		for (int hi = 0; hi < image->height() / 128; ++hi) {
-			for (int wi = 0; wi < image->width() / 72; ++wi) {
-				for (int fi = 0; fi < 4; ++fi) {
-					for (int afi = 0; afi < 3; ++afi) {
-						int i = ((hi << 2) + wi) * 12 + (fi * 3) + afi;
+		if (has_cells && !CanScanSpriteYOffsetLayout(rows, columns)) {
+			offset_array.fill(BASE_OFFSET);
+		} else if (has_cells) {
+			auto pixels = reinterpret_cast<unsigned char*>(image->pixels());
+			for (int hi = 0; hi < rows; ++hi) {
+				for (int wi = 0; wi < columns; ++wi) {
+					for (int fi = 0; fi < 4; ++fi) {
+						for (int afi = 0; afi < 3; ++afi) {
+							size_t i = (static_cast<size_t>(hi) * 4 + static_cast<size_t>(wi)) * FRAMES_PER_CHARACTER
+								+ static_cast<size_t>(fi * 3 + afi);
+							if (i >= offset_array.size()) {
+								offset_array.fill(BASE_OFFSET);
+								sprite_y_offsets.emplace(sprite_name, offset_array);
+								return BASE_OFFSET;
+							}
 
-						int start_x = wi * 72 + afi * 24;
-						int start_y = hi * 128 + fi * 32;
+							int start_x = wi * 72 + afi * 24;
+							int start_y = hi * 128 + fi * 32;
 
-						int y = start_y;
+							int y = start_y;
 
-						bool offset_found = false;
+							bool offset_found = false;
 
-						for (; y < start_y + 32; ++y) {
-							for (int x = start_x; x < start_x + 24; ++x) {
-								size_t index = BGRA * (y * image->width() + x);
-								auto pixels = reinterpret_cast<unsigned char*>(image->pixels());
-								if (pixels[index + 3] != 0) { // check if alpha is not 0 (fully transparent)
-									offset_found = true;
+							for (; y < start_y + 32; ++y) {
+								for (int x = start_x; x < start_x + 24; ++x) {
+									size_t index = BGRA * (y * image->width() + x);
+									if (pixels[index + 3] != 0) { // check if alpha is not 0 (fully transparent)
+										offset_found = true;
+										break;
+									}
+								}
+
+								if (offset_found) {
 									break;
 								}
 							}
-							
-							if (offset_found) {
-								break;
-							}
-						}
 
-						if (offset_found) {
-							if (y > start_y + 15) {
-								y = start_y + 15;
+							if (offset_found) {
+								if (y > start_y + 15) {
+									y = start_y + 15;
+								}
+								offset_array[i] = BASE_OFFSET + (y - start_y);
+							} else {
+								offset_array[i] = 32;
 							}
-							offset_array[i] = BASE_OFFSET + (y - start_y);
-						} else {
-							offset_array[i] = 32;
 						}
 					}
 				}
 			}
-
-			sprite_y_offsets[sprite_name] = std::array<int, 96>(offset_array);
 		}
+
+		offsets_it = sprite_y_offsets.emplace(sprite_name, offset_array).first;
 	}
 
 	auto frame = player.ch->GetAnimFrame();
@@ -174,7 +211,21 @@ int ChatName::GetSpriteYOffset() {
 		frame = lcf::rpg::EventPage::Frame_middle;
 	}
 
-	int ret = sprite_y_offsets[sprite_name][player.ch->GetSpriteIndex() * 12 + player.ch->GetFacing() * 3 + frame];
+	const int sprite_index = player.ch->GetSpriteIndex();
+	const int facing = player.ch->GetFacing();
+	if (sprite_index < 0 || sprite_index >= 8 ||
+			facing < 0 || facing >= 4 ||
+			frame < 0 || frame >= 3) {
+		return last_valid_sprite_y_offset;
+	}
+
+	const size_t offset_index = static_cast<size_t>(sprite_index) * FRAMES_PER_CHARACTER
+		+ static_cast<size_t>(facing * 3 + frame);
+	if (offset_index >= offsets_it->second.size()) {
+		return last_valid_sprite_y_offset;
+	}
+
+	int ret = offsets_it->second[offset_index];
 
 	if (ret != 32) {
 		last_valid_sprite_y_offset = ret;

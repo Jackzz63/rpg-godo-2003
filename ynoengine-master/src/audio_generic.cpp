@@ -20,6 +20,7 @@
 #include <cstring>
 #include <cassert>
 #include <memory>
+#include <mutex>
 #include "audio_generic.h"
 #include "output.h"
 
@@ -97,6 +98,7 @@ bool GenericAudio::BGM_PlayedOnce() const {
 	// Audio Decoders set this in the Decoding thread
 	for (auto& BGM_Channel : BGM_Channels) {
 		if (BGM_Channel.midi_out_used) {
+			std::lock_guard<GenericAudioMidiOut> midi_lock(*midi_thread);
 			BGM_PlayedOnceIndicator = midi_thread->GetMidiOut().GetLoopCount() > 0;
 		}
 	}
@@ -208,15 +210,24 @@ void GenericAudio::Update() {
 
 GenericAudioMidiOut* GenericAudio::CreateAndGetMidiOut() {
 	if (!midi_thread) {
-		midi_thread = std::make_unique<GenericAudioMidiOut>();
+		midi_thread = std::make_unique<GenericAudioMidiOut>(&midi_global_volume);
 		std::string status_message;
 		if (midi_thread->IsInitialized(status_message)) {
+			midi_thread->GetMidiOut().SetOutputMuted(native_midi_muted);
 			midi_thread->StartThread();
 		} else {
 			midi_thread.reset();
 		}
 	}
 	return midi_thread.get();
+}
+
+void GenericAudio::SetNativeMidiMuted(bool muted) {
+	native_midi_muted = muted;
+	if (midi_thread) {
+		std::lock_guard<GenericAudioMidiOut> midi_lock(*midi_thread);
+		midi_thread->GetMidiOut().SetOutputMuted(muted);
+	}
 }
 
 void GenericAudio::SetFormat(int frequency, AudioDecoder::Format format, int channels) {
@@ -246,7 +257,7 @@ bool GenericAudio::PlayOnChannel(BgmChannel& chan, Filesystem_Stream::InputStrea
 			CreateAndGetMidiOut();
 
 			if (midi_thread) {
-				midi_thread->LockMutex();
+				std::lock_guard<GenericAudioMidiOut> midi_lock(*midi_thread);
 				auto &midi_out = midi_thread->GetMidiOut();
 				if (midi_out.Open(std::move(filestream))) {
 					midi_out.SetPitch(pitch);
@@ -257,15 +268,14 @@ bool GenericAudio::PlayOnChannel(BgmChannel& chan, Filesystem_Stream::InputStrea
 					midi_out.Resume();
 					chan.paused = false;
 					chan.midi_out_used = true;
-					midi_thread->UnlockMutex();
 					return true;
 				}
-				midi_thread->UnlockMutex();
 			}
 		}
 	}
 
 	if (midi_thread) {
+		std::lock_guard<GenericAudioMidiOut> midi_lock(*midi_thread);
 		midi_thread->GetMidiOut().Reset();
 	}
 
@@ -308,11 +318,17 @@ void GenericAudio::Decode(uint8_t* output_buffer, int buffer_length) {
 
 	assert(buffer_length > 0);
 
-	if (sample_buffer.size() != (size_t)buffer_length) {
-		sample_buffer.resize(buffer_length);
+	// Godot requests complete S16 stereo frames. These buffers hold sample
+	// elements, not bytes. Keep the existing allocation policy for the other
+	// GenericAudio output formats and incomplete frame requests.
+	const bool s16_stereo_frames = output_format.format == AudioDecoder::Format::S16
+		&& output_format.channels == 2 && buffer_length % (2 * sizeof(int16_t)) == 0;
+	const size_t sample_count = s16_stereo_frames ? buffer_length / sizeof(int16_t) : buffer_length;
+	if (sample_buffer.size() != sample_count) {
+		sample_buffer.resize(sample_count);
 	}
-	if (mixer_buffer.size() != (size_t)buffer_length) {
-		mixer_buffer.resize(buffer_length);
+	if (mixer_buffer.size() != sample_count) {
+		mixer_buffer.resize(sample_count);
 	}
 	scrap_buffer_size = samples_per_frame * output_format.channels * sizeof(uint32_t);
 	if (scrap_buffer.size() != scrap_buffer_size) {
@@ -502,6 +518,7 @@ void GenericAudio::BgmChannel::Stop() {
 	stopped = true;
 	if (midi_out_used) {
 		midi_out_used = false;
+		std::lock_guard<GenericAudioMidiOut> midi_lock(*instance->midi_thread);
 		instance->midi_thread->GetMidiOut().Reset();
 		instance->midi_thread->GetMidiOut().Pause();
 	} else if (decoder) {
@@ -512,6 +529,7 @@ void GenericAudio::BgmChannel::Stop() {
 void GenericAudio::BgmChannel::SetPaused(bool newPaused) {
 	paused = newPaused;
 	if (midi_out_used) {
+		std::lock_guard<GenericAudioMidiOut> midi_lock(*instance->midi_thread);
 		if (newPaused) {
 			instance->midi_thread->GetMidiOut().Pause();
 		} else {
@@ -522,6 +540,7 @@ void GenericAudio::BgmChannel::SetPaused(bool newPaused) {
 
 int GenericAudio::BgmChannel::GetTicks() const {
 	if (midi_out_used) {
+		std::lock_guard<GenericAudioMidiOut> midi_lock(*instance->midi_thread);
 		return instance->midi_thread->GetMidiOut().GetTicks();
 	} else if (decoder) {
 		return decoder->GetTicks();
@@ -531,6 +550,7 @@ int GenericAudio::BgmChannel::GetTicks() const {
 
 void GenericAudio::BgmChannel::SetFade(int fade) {
 	if (midi_out_used) {
+		std::lock_guard<GenericAudioMidiOut> midi_lock(*instance->midi_thread);
 		instance->midi_thread->GetMidiOut().SetFade(0, std::chrono::milliseconds(fade));
 	} else if (decoder) {
 		decoder->SetFade(0, std::chrono::milliseconds(fade));
@@ -539,6 +559,7 @@ void GenericAudio::BgmChannel::SetFade(int fade) {
 
 void GenericAudio::BgmChannel::SetVolume(int volume) {
 	if (midi_out_used) {
+		std::lock_guard<GenericAudioMidiOut> midi_lock(*instance->midi_thread);
 		instance->midi_thread->GetMidiOut().SetVolume(volume);
 	} else if (decoder) {
 		decoder->SetVolume(volume);
@@ -547,6 +568,7 @@ void GenericAudio::BgmChannel::SetVolume(int volume) {
 
 void GenericAudio::BgmChannel::SetPitch(int pitch) {
 	if (midi_out_used) {
+		std::lock_guard<GenericAudioMidiOut> midi_lock(*instance->midi_thread);
 		instance->midi_thread->GetMidiOut().SetPitch(pitch);
 	} else if (decoder) {
 		decoder->SetPitch(pitch);
@@ -555,6 +577,7 @@ void GenericAudio::BgmChannel::SetPitch(int pitch) {
 
 void GenericAudio::BgmChannel::SetBalance(int balance) {
 	if (midi_out_used) {
+		std::lock_guard<GenericAudioMidiOut> midi_lock(*instance->midi_thread);
 		instance->midi_thread->GetMidiOut().SetBalance(balance);
 	} else if (decoder) {
 		decoder->SetBalance(balance);

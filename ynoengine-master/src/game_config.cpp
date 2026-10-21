@@ -86,6 +86,7 @@ void Game_ConfigVideo::Hide() {
 	touch_ui.SetOptionVisible(false);
 	pause_when_focus_lost.SetOptionVisible(false);
 	game_resolution.SetOptionVisible(false);
+	screen_scale.SetOptionVisible(false);
 }
 
 void Game_ConfigAudio::Hide() {
@@ -105,7 +106,9 @@ Game_Config Game_Config::Create(CmdlineParser& cp) {
 	Game_Config cfg;
 
 	// Set platform specific defaults
-#if USE_SDL >= 2
+#if defined(PLAYER_TARGET_GODOT)
+	cfg.video.scaling_mode.Set(ConfigEnum::ScalingMode::SharpPixel);
+#elif USE_SDL >= 2
 	cfg.video.scaling_mode.Set(ConfigEnum::ScalingMode::Bilinear);
 #endif
 
@@ -600,6 +603,7 @@ void Game_Config::LoadFromStream(Filesystem_Stream::InputStream& is) {
 	video.touch_ui.FromIni(ini);
 	video.pause_when_focus_lost.FromIni(ini);
 	video.game_resolution.FromIni(ini);
+	video.screen_scale.FromIni(ini);
 
 	if (ini.HasValue("Video", "WindowX") && ini.HasValue("Video", "WindowY") && ini.HasValue("Video", "WindowWidth") && ini.HasValue("Video", "WindowHeight")) {
 		video.window_x.FromIni(ini);
@@ -702,6 +706,7 @@ void Game_Config::WriteToStream(Filesystem_Stream::OutputStream& os) const {
 	video.touch_ui.ToIni(os);
 	video.pause_when_focus_lost.ToIni(os);
 	video.game_resolution.ToIni(os);
+	video.screen_scale.ToIni(os);
 
 	// only preserve when toggling between window and fullscreen is supported
 	if (video.fullscreen.IsOptionVisible()) {

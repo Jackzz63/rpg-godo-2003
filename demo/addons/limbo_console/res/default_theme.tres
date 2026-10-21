@@ -1,6 +1,6 @@
 [gd_resource type="Theme" format=3 uid="uid://dq4nntds66bix"]
 
-[ext_resource type="FontFile" uid="uid://dh8uf0t6kqv8" path="res://resources/RM2000.ttf" id="1_4jovq"]
+[ext_resource type="FontVariation" path="res://resources/webpage_game_ui_font.tres" id="1_4jovq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yia2g"]
 content_margin_left = 6.0

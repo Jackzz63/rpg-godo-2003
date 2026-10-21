@@ -1,17 +1,46 @@
 [gd_scene format=3 uid="uid://dqclyd3klu6qq"]
 
 [ext_resource type="Script" uid="uid://bpl2msts7fe8c" path="res://cogs/audio_output.gd" id="2_0wfyh"]
-[ext_resource type="Script" uid="uid://c7appq8adg23t" path="res://cogs/debug.gd" id="2_o6xl0"]
+[ext_resource type="Script" uid="uid://bgb0xx0says4" path="res://cogs/debug.gd" id="2_o6xl0"]
 [ext_resource type="Theme" uid="uid://dx13y3513lj8e" path="res://resources/theme.tres" id="2_sugp2"]
-[ext_resource type="Script" uid="uid://k5g7aae8way2" path="res://cogs/player.gd" id="2_tipki"]
-[ext_resource type="Script" uid="uid://blxa12njnbatg" path="res://cogs/setup_screen.gd" id="3_tefeu"]
+[ext_resource type="Script" uid="uid://c561u7lacb6tj" path="res://cogs/player.gd" id="2_tipki"]
+[ext_resource type="Script" uid="uid://dohuxtg0pao8p" path="res://cogs/setup_screen.gd" id="3_tefeu"]
 [ext_resource type="Texture2D" uid="uid://dcw31o6ckjsa3" path="res://resources/orchidmantis_system_celestial.png" id="4_tbgi4"]
 [ext_resource type="Texture2D" uid="uid://8nq581ljnhf1" path="res://resources/16x16.png" id="4_tefeu"]
-[ext_resource type="Script" uid="uid://bj2avukotla54" path="res://cogs/chat_overlay.gd" id="8_85g3d"]
+[ext_resource type="Script" uid="uid://bh5o7v4l4rvpm" path="res://cogs/chat_overlay.gd" id="8_85g3d"]
+[ext_resource type="Script" path="res://cogs/chat_mention_edit.gd" id="atomic_chat_edit"]
 [ext_resource type="Script" uid="uid://c7d4uy5lls8cx" path="res://cogs/game_texture.gd" id="8_tipki"]
-[ext_resource type="FontFile" uid="uid://dh8uf0t6kqv8" path="res://resources/RM2000.ttf" id="10_choun"]
 [ext_resource type="StyleBox" uid="uid://bfbanystyirf6" path="res://resources/chat_stylebox.tres" id="11_ya4ey"]
 [ext_resource type="StyleBox" uid="uid://cg3fj7teitw24" path="res://resources/chat_stylebox_focus.tres" id="12_eb6dy"]
+[ext_resource type="Script" path="res://cogs/global_chat_toggle.gd" id="13_global_chat_toggle"]
+[ext_resource type="StyleBox" path="res://resources/chat_toggle_on_stylebox.tres" id="14_chat_toggle_on"]
+[ext_resource type="FontVariation" path="res://resources/webpage_game_ui_font.tres" id="15_chat_font"]
+[ext_resource type="StyleBox" path="res://resources/chat_toggle_focus_stylebox.tres" id="16_chat_toggle_focus"]
+[ext_resource type="Script" path="res://cogs/world_location_banner.gd" id="17_world_location_banner"]
+[ext_resource type="StyleBox" uid="uid://ca3cj8e1se5t3" path="res://resources/borders_texture.tres" id="19_banner_border"]
+[ext_resource type="Script" path="res://cogs/privacy_mode_toggle.gd" id="20_privacy_mode_toggle"]
+[ext_resource type="FontVariation" path="res://resources/launcher_font.tres" id="21_launcher_password_font"]
+[ext_resource type="Texture2D" path="res://resources/icons/eye.svg" id="22_password_visible"]
+[ext_resource type="Texture2D" path="res://resources/icons/eye-closed.svg" id="23_password_hidden"]
+[ext_resource type="Script" path="res://cogs/launcher_admin_popup.gd" id="24_admin_popup"]
+[ext_resource type="Script" path="res://cogs/launcher_refresh_button.gd" id="25_launcher_refresh"]
+[ext_resource type="PackedScene" path="res://scenes/launcher_advanced_popup.tscn" id="26_advanced_options"]
+
+[ext_resource type="PackedScene" path="res://scenes/host_advanced_popup.tscn" id="27_host_options"]
+[ext_resource type="Texture2D" path="res://resources/icons/gear.svg" id="28_host_gear"]
+[ext_resource type="PackedScene" path="res://scenes/launcher_caption.tscn" id="launcher_caption"]
+[ext_resource type="PackedScene" path="res://scenes/launcher_button.tscn" id="launcher_button"]
+[ext_resource type="Script" path="res://cogs/launcher_host_row.gd" id="launcher_host_row"]
+[ext_resource type="Script" path="res://cogs/launcher_icon_preview.gd" id="launcher_icon_preview"]
+[ext_resource type="Texture2D" path="res://resources/icons/usershield.svg" id="launcher_admin_icon"]
+[ext_resource type="Texture2D" path="res://resources/icons/reload.svg" id="launcher_reload_icon"]
+
+[ext_resource type="Script" path="res://cogs/window_mode_controller.gd" id="window_modes"]
+[ext_resource type="Script" path="res://cogs/launcher_window_actions.gd" id="launcher_window_actions"]
+[ext_resource type="Texture2D" path="res://resources/icons/expand.svg" id="fullscreen_icon"]
+[ext_resource type="Texture2D" path="res://resources/icons/close.svg" id="close_icon"]
+
+[ext_resource type="Script" path="res://cogs/launcher_caption.gd" id="caption_style"]
 
 [sub_resource type="Gradient" id="Gradient_tbgi4"]
 offsets = PackedFloat32Array(0, 0.627907, 0.9302326, 1)
@@ -31,10 +60,6 @@ adjustment_color_correction = SubResource("GradientTexture1D_tefeu")
 atlas = ExtResource("4_tbgi4")
 region = Rect2(0, 32, 16, 16)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_tefeu"]
-atlas = ExtResource("4_tbgi4")
-region = Rect2(0, 48, 16, 16)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_o6xl0"]
 atlas = ExtResource("4_tefeu")
 region = Rect2(128, 0, 16, 16)
@@ -42,18 +67,24 @@ region = Rect2(128, 0, 16, 16)
 [sub_resource type="ViewportTexture" id="ViewportTexture_tipki"]
 viewport_path = NodePath("EngineLayer/TextureRect/GameSubViewport")
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_chat_selection"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+
 [node name="Main" type="Node" unique_id=1774641092]
+
 
 [node name="WE_PostProcess" type="WorldEnvironment" parent="." unique_id=1883357518]
 environment = SubResource("Environment_0wfyh")
 
-[node name="RPGMakerPlayer" type="RPGMakerPlayer" parent="." unique_id=459576679 node_paths=PackedStringArray("texture_rect", "game_sub_viewport", "chat_text_field")]
+[node name="RPGMakerPlayer" type="RPGMakerPlayer" parent="." unique_id=459576679 node_paths=PackedStringArray("texture_rect", "game_sub_viewport", "game_output", "chat_text_field")]
 game_path = "res://games/CU_offline"
 unique_name_in_owner = true
 script = ExtResource("2_tipki")
 texture_rect = NodePath("../EngineLayer/TextureRect/GameSubViewport/GameTexture")
 game_sub_viewport = NodePath("../EngineLayer/TextureRect/GameSubViewport")
-chat_text_field = NodePath("../ChatOverlayLayer/ChatControl/VBoxContainer/ChatField")
+game_output = NodePath("../EngineLayer/TextureRect")
+chat_text_field = NodePath("../ChatOverlayLayer/ChatControl/VBoxContainer/ChatInputRow/ChatFieldFrame/ChatField")
 
 [node name="AudioOutput" type="Node" parent="RPGMakerPlayer" unique_id=1197651198 node_paths=PackedStringArray("engine")]
 script = ExtResource("2_0wfyh")
@@ -73,12 +104,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-stretch = true
+stretch = false
 mouse_target = true
 metadata/_edit_use_anchors_ = true
 
 [node name="SubViewport" type="SubViewport" parent="GodotMenuLayer/SubViewportContainer" unique_id=912900428]
 handle_input_locally = false
+gui_embed_subwindows = true
 canvas_item_default_texture_filter = 0
 size = Vector2i(640, 480)
 render_target_update_mode = 4
@@ -95,6 +127,140 @@ theme = ExtResource("2_sugp2")
 script = ExtResource("3_tefeu")
 engine = NodePath("../../../../RPGMakerPlayer")
 metadata/_edit_use_anchors_ = true
+metadata/physical_ui_scale_root = true
+
+[node name="LauncherModalShade" type="ColorRect" parent="GodotMenuLayer"]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.45)
+
+[node name="AdminCredentialPopup" type="Window" parent="GodotMenuLayer"]
+borderless = true
+unresizable = true
+canvas_item_default_texture_filter = 0
+unique_name_in_owner = true
+size = Vector2i(276, 150)
+visible = false
+transient = true
+exclusive = true
+theme = ExtResource("2_sugp2")
+script = ExtResource("24_admin_popup")
+metadata/physical_ui_scale_root = true
+
+[node name="Background" type="Panel" parent="GodotMenuLayer/AdminCredentialPopup"]
+theme = ExtResource("2_sugp2")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Border" type="Panel" parent="GodotMenuLayer/AdminCredentialPopup"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("19_banner_border")
+
+[node name="Margin" type="MarginContainer" parent="GodotMenuLayer/AdminCredentialPopup"]
+theme = ExtResource("2_sugp2")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Content" type="VBoxContainer" parent="GodotMenuLayer/AdminCredentialPopup/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" parent="GodotMenuLayer/AdminCredentialPopup/Margin/Content" instance=ExtResource("launcher_caption")]
+layout_mode = 2
+text = "管理员密码"
+horizontal_alignment = 1
+
+[node name="CredentialRow" type="HBoxContainer" parent="GodotMenuLayer/AdminCredentialPopup/Margin/Content"]
+layout_mode = 2
+alignment = 1
+
+[node name="AdminCredential" type="LineEdit" parent="GodotMenuLayer/AdminCredentialPopup/Margin/Content/CredentialRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(184, 32)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("21_launcher_password_font")
+secret = true
+secret_character = "*"
+max_length = 160
+caret_blink = true
+
+[node name="AdminCredentialVisibility" type="Button" parent="GodotMenuLayer/AdminCredentialPopup/Margin/Content/CredentialRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+mouse_default_cursor_shape = 2
+layout_mode = 2
+focus_mode = 0
+theme_override_constants/icon_max_width = 32
+icon = ExtResource("23_password_hidden")
+flat = true
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+tooltip_text = "显示密码"
+
+[node name="SaveError" type="Label" parent="GodotMenuLayer/AdminCredentialPopup/Margin/Content"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.65, 0.65, 1)
+autowrap_mode = 2
+horizontal_alignment = 1
+
+[node name="Actions" type="HBoxContainer" parent="GodotMenuLayer/AdminCredentialPopup/Margin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Save" parent="GodotMenuLayer/AdminCredentialPopup/Margin/Content/Actions" instance=ExtResource("launcher_button")]
+design_minimum_size = Vector2(80, 32)
+footer_action = true
+layout_mode = 2
+
+caption_text = "保存"
+
+[node name="Cancel" parent="GodotMenuLayer/AdminCredentialPopup/Margin/Content/Actions" instance=ExtResource("launcher_button")]
+design_minimum_size = Vector2(80, 32)
+footer_action = true
+layout_mode = 2
+
+caption_text = "取消"
+
+[node name="AdvancedOptionsPopup" parent="GodotMenuLayer" instance=ExtResource("26_advanced_options")]
+unique_name_in_owner = true
+
+[node name="HostAdvancedPopup" parent="GodotMenuLayer" instance=ExtResource("27_host_options")]
+unique_name_in_owner = true
+
+[node name="LocationConfigError" type="AcceptDialog" parent="."]
+unique_name_in_owner = true
+title = "配置读取失败"
+dialog_autowrap = true
+ok_button_text = "确认"
+transient = true
+exclusive = true
+theme = ExtResource("2_sugp2")
 
 [node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen" unique_id=1639508812]
 z_index = -2
@@ -114,9 +280,9 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -140.0
+offset_left = -182.0
 offset_top = -134.0
-offset_right = 140.0
+offset_right = 182.0
 offset_bottom = 134.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -148,7 +314,7 @@ alignment = 1
 layout_mode = 2
 
 [node name="Spacer" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GamePath/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=682192264]
-custom_minimum_size = Vector2(15, 0)
+custom_minimum_size = Vector2(20, 0)
 layout_mode = 2
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GamePath/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=1712045101]
@@ -156,25 +322,13 @@ layout_mode = 2
 alignment = 1
 
 [node name="RichTextLabel" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GamePath/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer/VBoxContainer2" unique_id=490659906]
-clip_children = 1
-custom_minimum_size = Vector2(60, 0)
+script = ExtResource("caption_style")
+custom_minimum_size = Vector2(104, 0)
 layout_mode = 2
 bbcode_enabled = true
-text = "Game path:"
+text = "游戏目录"
 fit_content = true
 vertical_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GamePath/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer/VBoxContainer2/RichTextLabel" unique_id=1636360012]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GamePath/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=615035627]
 layout_mode = 2
@@ -182,15 +336,20 @@ alignment = 1
 
 [node name="GamePath" type="LineEdit" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GamePath/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1513494830]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 0)
+custom_minimum_size = Vector2(184, 32)
 layout_mode = 2
+alignment = 0
 placeholder_text = "/dev/null"
 caret_blink = true
 
 [node name="GamePathButton" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GamePath/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=977179384]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+mouse_default_cursor_shape = 2
 layout_mode = 2
+theme_override_constants/icon_max_width = 16
 icon = SubResource("AtlasTexture_o6xl0")
+expand_icon = true
 
 [node name="GamePathFileDialog" type="FileDialog" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GamePath/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer/GamePathButton" unique_id=1378254326]
 unique_name_in_owner = true
@@ -201,7 +360,7 @@ access = 2
 use_native_dialog = true
 
 [node name="AudioVolume" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer" unique_id=1947328750]
-custom_minimum_size = Vector2(48, 48)
+custom_minimum_size = Vector2(48, 62.4)
 layout_mode = 2
 mouse_filter = 2
 
@@ -223,130 +382,33 @@ layout_mode = 2
 alignment = 1
 
 [node name="RichTextLabel" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/AudioVolume/MarginContainer/PanelContainer/VBoxContainer" unique_id=1900612781]
-clip_children = 1
+script = ExtResource("caption_style")
 layout_mode = 2
 bbcode_enabled = true
-text = "Audio Volume:"
+text = "音量"
 fit_content = true
 horizontal_alignment = 1
 vertical_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/AudioVolume/MarginContainer/PanelContainer/VBoxContainer/RichTextLabel" unique_id=1052187905]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/AudioVolume/MarginContainer/PanelContainer/VBoxContainer" unique_id=816480569]
 layout_mode = 2
 
 [node name="Control2" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/AudioVolume/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=1529769459]
-custom_minimum_size = Vector2(40, 0)
+custom_minimum_size = Vector2(52, 0)
 layout_mode = 2
 
 [node name="AudioSlider" type="HSlider" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/AudioVolume/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=276613756]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(186, 0)
+custom_minimum_size = Vector2(242, 0)
 layout_mode = 2
+scrollable = false
 
 [node name="Control" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/AudioVolume/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=165061355]
-custom_minimum_size = Vector2(40, 0)
+custom_minimum_size = Vector2(52, 0)
 layout_mode = 2
-
-[node name="GameOptions" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer" unique_id=1252056792]
-custom_minimum_size = Vector2(48, 96.295)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="MarginContainer" type="MarginContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions" unique_id=2043966806]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="PanelContainer" type="PanelContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer" unique_id=249397716]
-layout_mode = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="VBoxContainer" type="VBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer/PanelContainer" unique_id=925002290]
-layout_mode = 2
-alignment = 1
-
-[node name="RichTextLabel" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer/PanelContainer/VBoxContainer" unique_id=1959814526]
-clip_children = 1
-layout_mode = 2
-bbcode_enabled = true
-text = "Game options"
-fit_content = true
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer/PanelContainer/VBoxContainer/RichTextLabel" unique_id=2123298504]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
-
-[node name="MarginContainer" type="MarginContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer/PanelContainer/VBoxContainer" unique_id=2085684771]
-layout_mode = 2
-theme_override_constants/margin_left = 50
-theme_override_constants/margin_right = 50
-
-[node name="VBoxContainer" type="VBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer/PanelContainer/VBoxContainer/MarginContainer" unique_id=518943081]
-layout_mode = 2
-
-[node name="RichTextLabel2" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer/PanelContainer/VBoxContainer/MarginContainer/VBoxContainer" unique_id=1365186472]
-clip_children = 1
-layout_mode = 2
-bbcode_enabled = true
-text = "Window scale"
-fit_content = true
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer/PanelContainer/VBoxContainer/MarginContainer/VBoxContainer/RichTextLabel2" unique_id=251145084]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
-
-[node name="WindowScale" type="OptionButton" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer/PanelContainer/VBoxContainer/MarginContainer/VBoxContainer" unique_id=1935431017]
-unique_name_in_owner = true
-layout_mode = 2
-selected = 0
-item_count = 4
-popup/item_0/text = "1x"
-popup/item_0/id = 0
-popup/item_1/text = "2x"
-popup/item_1/id = 1
-popup/item_2/text = "3x"
-popup/item_2/id = 2
-popup/item_3/text = "4x"
-popup/item_3/id = 3
 
 [node name="Multiplayer" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer" unique_id=325583667]
-custom_minimum_size = Vector2(48, 150)
+custom_minimum_size = Vector2(48, 232)
 layout_mode = 2
 mouse_filter = 2
 
@@ -366,9 +428,11 @@ metadata/_edit_use_anchors_ = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer" unique_id=1914004533]
 layout_mode = 2
+theme_override_constants/separation = 6
 alignment = 1
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer" unique_id=2049179882]
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 alignment = 1
 
@@ -377,112 +441,164 @@ layout_mode = 2
 alignment = 1
 
 [node name="RichTextLabel" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer3/VBoxContainer" unique_id=923353004]
-clip_children = 1
-custom_minimum_size = Vector2(90, 0)
+script = ExtResource("caption_style")
+custom_minimum_size = Vector2(156, 0)
 layout_mode = 2
 bbcode_enabled = true
-text = "Multiplayer:"
+text = "多人联机模式"
 fit_content = true
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer3/VBoxContainer/RichTextLabel" unique_id=182415426]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
-
 [node name="Spacer" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=2082739252]
-custom_minimum_size = Vector2(8, 0)
+custom_minimum_size = Vector2(10, 0)
 layout_mode = 2
 
 [node name="MpEnable" type="CheckBox" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1940980210]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer" unique_id=590387434]
 layout_mode = 2
 
 [node name="Spacer" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1876263409]
-custom_minimum_size = Vector2(15, 0)
+custom_minimum_size = Vector2(20, 0)
 layout_mode = 2
 
 [node name="RichTextLabel" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=606968686]
-clip_children = 1
-custom_minimum_size = Vector2(70, 0)
+script = ExtResource("caption_style")
+custom_minimum_size = Vector2(104, 0)
 layout_mode = 2
 bbcode_enabled = true
-text = "Nickname:"
+text = "昵称ID"
 fit_content = true
 vertical_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer2/RichTextLabel" unique_id=1233680694]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
-
 [node name="MpName" type="LineEdit" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer2" unique_id=647784948]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 0)
+custom_minimum_size = Vector2(184, 32)
 layout_mode = 2
+alignment = 0
 text = "Minnatsuki"
-placeholder_text = "Minnatsuki"
+placeholder_text = "仅英文/数字，最长12字符"
+max_length = 12
 caret_blink = true
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer" unique_id=1555525724]
 layout_mode = 2
 
 [node name="Spacer" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer4" unique_id=1079659490]
-custom_minimum_size = Vector2(15, 0)
+custom_minimum_size = Vector2(20, 0)
 layout_mode = 2
 
 [node name="RichTextLabel" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer4" unique_id=1687627028]
-clip_children = 1
-custom_minimum_size = Vector2(70, 0)
+script = ExtResource("caption_style")
+custom_minimum_size = Vector2(104, 0)
 layout_mode = 2
 bbcode_enabled = true
-text = "Connect to:"
+text = "连接至IP"
 fit_content = true
 vertical_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer4/RichTextLabel" unique_id=751157405]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
-
 [node name="MpUrl" type="LineEdit" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer4" unique_id=1912673637]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(160, 0)
+custom_minimum_size = Vector2(184, 32)
 layout_mode = 2
+alignment = 0
 text = "ws://127.0.0.1:42424"
 placeholder_text = "ws(s)://host:port"
 caret_blink = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer" unique_id=1263856904]
+[node name="AdminCredentialButton" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer4"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme_override_constants/icon_max_width = 32
+flat = true
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+tooltip_text = "管理员密码"
+script = ExtResource("launcher_icon_preview")
+preview_icon = ExtResource("launcher_admin_icon")
+
+[node name="ServerStatusRow" type="HBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
+[node name="Spacer" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/ServerStatusRow"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="ServerStatusTitle" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/ServerStatusRow"]
+unique_name_in_owner = true
+script = ExtResource("caption_style")
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+bbcode_enabled = true
+text = "服务器状态"
+fit_content = true
+vertical_alignment = 1
+
+[node name="ServerStatusValues" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/ServerStatusRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(184, 32)
+layout_mode = 2
+
+[node name="ServerPing" type="Label" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/ServerStatusRow/ServerStatusValues"]
+unique_name_in_owner = true
+layout_mode = 1
+anchor_left = 0.25
+anchor_right = 0.25
+anchor_bottom = 1.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "-ms"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ServerOnlineCount" type="Label" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/ServerStatusRow/ServerStatusValues"]
+unique_name_in_owner = true
+mouse_filter = 1
+layout_mode = 1
+anchor_left = 0.75
+anchor_right = 0.75
+anchor_bottom = 1.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "-人在线"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ServerRefreshButton" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/ServerStatusRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+mouse_default_cursor_shape = 2
+layout_mode = 2
+theme_override_constants/icon_max_width = 32
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+flat = true
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+tooltip_text = "刷新"
+script = ExtResource("25_launcher_refresh")
+preview_icon = ExtResource("launcher_reload_icon")
+
+[node name="HBoxContainer" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer" unique_id=1263856904]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+script = ExtResource("launcher_host_row")
+
 [node name="Spacer" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=522823102]
-custom_minimum_size = Vector2(15, 0)
+custom_minimum_size = Vector2(20, 0)
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=341879914]
@@ -490,37 +606,48 @@ layout_mode = 2
 alignment = 1
 
 [node name="RichTextLabel" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=1808411963]
-clip_children = 1
-custom_minimum_size = Vector2(150, 0)
+script = ExtResource("caption_style")
 layout_mode = 2
 bbcode_enabled = true
-text = "Start localhost server:"
+text = "作为主机在局域网开服"
 fit_content = true
+autowrap_mode = 0
 vertical_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer/VBoxContainer/RichTextLabel" unique_id=568647589]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
 
 [node name="MpServer" type="CheckBox" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=573693616]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
+
+[node name="HostAdvancedButton" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 0
+mouse_default_cursor_shape = 2
+tooltip_text = "主机附加设置"
+icon = ExtResource("28_host_gear")
+icon_alignment = 1
+expand_icon = true
+theme_override_constants/icon_max_width = 16
 
 [node name="HBoxContainer" type="HBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer" unique_id=639083235]
 layout_mode = 2
 alignment = 2
 
+[node name="AdvancedSettingsButton" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer" instance=ExtResource("launcher_button")]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_default_cursor_shape = 2
+
+caption_text = "其他设置"
+
+[node name="AdvancedSpacer" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="RunOnStart" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer" unique_id=1168768736]
 visible = false
-custom_minimum_size = Vector2(128.02, 40)
+custom_minimum_size = Vector2(166.426, 40)
 layout_mode = 2
 mouse_filter = 2
 
@@ -549,7 +676,7 @@ layout_mode = 2
 alignment = 1
 
 [node name="RichTextLabel" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer/RunOnStart/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer/VBoxContainer" unique_id=226766833]
-clip_children = 1
+script = ExtResource("caption_style")
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 bbcode_enabled = true
@@ -558,73 +685,71 @@ fit_content = true
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer/RunOnStart/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer/VBoxContainer/RichTextLabel" unique_id=1896756509]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
-
 [node name="RunOnStart" type="CheckBox" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer/RunOnStart/MarginContainer/PanelContainer/VBoxContainer/HBoxContainer" unique_id=232033457]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_default_cursor_shape = 2
 
-[node name="SaveAndRun" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer" unique_id=1664356463]
+[node name="SaveAndRun" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer" instance=ExtResource("launcher_button")]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(96, 28)
+design_minimum_size = Vector2(124.8, 28)
+mouse_default_cursor_shape = 2
 layout_mode = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer/SaveAndRun" unique_id=1099562076]
-z_index = -1
-layout_mode = 1
-anchors_preset = 15
+caption_text = "保存并启动"
+
+[node name="WindowActions" type="Control" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen"]
+layout_mode = 0
+mouse_filter = 2
+script = ExtResource("launcher_window_actions")
+metadata/physical_ui_scale_geometry_is_physical = true
+
+[node name="FullscreenButton" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/WindowActions"]
+layout_mode = 0
+custom_minimum_size = Vector2(32, 32)
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_constants/icon_max_width = 20
+theme_override_styles/normal = ExtResource("11_ya4ey")
+theme_override_styles/hover = ExtResource("11_ya4ey")
+theme_override_styles/focus = ExtResource("16_chat_toggle_focus")
+icon_alignment = 1
+expand_icon = true
+offset_right = 32.0
+offset_bottom = 32.0
+icon = ExtResource("fullscreen_icon")
+
+[node name="CloseButton" type="Button" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/WindowActions"]
+layout_mode = 0
+custom_minimum_size = Vector2(32, 32)
+focus_mode = 0
+mouse_default_cursor_shape = 2
+theme_override_constants/icon_max_width = 20
+theme_override_styles/normal = ExtResource("11_ya4ey")
+theme_override_styles/hover = ExtResource("11_ya4ey")
+theme_override_styles/focus = ExtResource("16_chat_toggle_focus")
+icon_alignment = 1
+expand_icon = true
+anchor_left = 1.0
 anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="PanelContainer" type="PanelContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer/SaveAndRun/MarginContainer" unique_id=191998594]
-layout_mode = 2
-mouse_filter = 2
-metadata/_edit_use_anchors_ = true
-
-[node name="VBoxContainer" type="VBoxContainer" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer/SaveAndRun/MarginContainer/PanelContainer" unique_id=17713885]
-layout_mode = 2
-mouse_filter = 2
-alignment = 1
-
-[node name="RichTextLabel" type="RichTextLabel" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer/SaveAndRun/MarginContainer/PanelContainer/VBoxContainer" unique_id=1115886119]
-clip_children = 1
-layout_mode = 2
-mouse_filter = 2
-bbcode_enabled = true
-text = "Save and run"
-fit_content = true
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="TextureRect" type="TextureRect" parent="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/HBoxContainer/SaveAndRun/MarginContainer/PanelContainer/VBoxContainer/RichTextLabel" unique_id=130553268]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = SubResource("AtlasTexture_tefeu")
-expand_mode = 1
-stretch_mode = 1
-metadata/_edit_use_anchors_ = true
+offset_left = -32.0
+offset_bottom = 32.0
+grow_horizontal = 0
+icon = ExtResource("close_icon")
 
 [node name="EngineLayer" type="CanvasLayer" parent="." unique_id=1085336250]
 unique_name_in_owner = true
 visible = false
+layer = 0
+
+[node name="Background" type="ColorRect" parent="EngineLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
 
 [node name="TextureRect" type="TextureRect" parent="EngineLayer" unique_id=443753672]
 anchors_preset = 15
@@ -633,6 +758,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = SubResource("ViewportTexture_tipki")
+expand_mode = 1
 metadata/_edit_use_anchors_ = true
 
 [node name="GameSubViewport" type="SubViewport" parent="EngineLayer/TextureRect" unique_id=1663316751]
@@ -640,7 +766,7 @@ unique_name_in_owner = true
 handle_input_locally = false
 canvas_item_default_texture_filter = 0
 size = Vector2i(320, 240)
-render_target_update_mode = 4
+render_target_update_mode = 1
 
 [node name="BlackBG" type="ColorRect" parent="EngineLayer/TextureRect/GameSubViewport" unique_id=255198257]
 anchors_preset = 15
@@ -662,9 +788,54 @@ stretch_mode = 5
 script = ExtResource("8_tipki")
 engine = NodePath("../../../../RPGMakerPlayer")
 
+[node name="WorldLocationBannerLayer" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+layer = 1
+
+[node name="WorldLocationBanner" type="Control" parent="WorldLocationBannerLayer" node_paths=PackedStringArray("chat_control", "game_output")]
+unique_name_in_owner = true
+texture_filter = 1
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+mouse_behavior_recursive = 1
+script = ExtResource("17_world_location_banner")
+chat_control = NodePath("../../ChatOverlayLayer/ChatControl")
+game_output = NodePath("../../EngineLayer/TextureRect")
+metadata/physical_ui_scale_root = true
+
+[node name="BannerFrame" type="Control" parent="WorldLocationBannerLayer/WorldLocationBanner"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+mouse_filter = 2
+mouse_behavior_recursive = 1
+
+[node name="BannerLabel" type="RichTextLabel" parent="WorldLocationBannerLayer/WorldLocationBanner/BannerFrame"]
+unique_name_in_owner = true
+layout_mode = 0
+mouse_filter = 2
+mouse_behavior_recursive = 1
+focus_mode = 0
+horizontal_alignment = 0
+theme_override_fonts/normal_font = ExtResource("15_chat_font")
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+
+[node name="BannerDisplayTimer" type="Timer" parent="WorldLocationBannerLayer/WorldLocationBanner"]
+unique_name_in_owner = true
+wait_time = 5.0
+one_shot = true
+
 [node name="ChatOverlayLayer" type="CanvasLayer" parent="." unique_id=1353566743]
 unique_name_in_owner = true
 visible = false
+layer = 2
 
 [node name="ChatControl" type="Control" parent="ChatOverlayLayer" unique_id=760576190]
 unique_name_in_owner = true
@@ -677,6 +848,232 @@ grow_vertical = 2
 mouse_filter = 2
 mouse_behavior_recursive = 2
 script = ExtResource("8_85g3d")
+metadata/physical_ui_scale_root = true
+
+[node name="TopLeftActions" type="HBoxContainer" parent="ChatOverlayLayer/ChatControl"]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+mouse_behavior_recursive = 2
+theme_override_constants/separation = 0
+
+[node name="MultiplayerStatusVBox" type="VBoxContainer" parent="ChatOverlayLayer/ChatControl"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_bottom = 80.0
+grow_horizontal = 0
+mouse_filter = 2
+mouse_behavior_recursive = 2
+theme_override_constants/separation = 0
+
+[node name="StatusButtonRow" type="HBoxContainer" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox"]
+layout_mode = 2
+size_flags_horizontal = 8
+mouse_filter = 2
+mouse_behavior_recursive = 2
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="ConnectionStatusIndicator" type="PanelContainer" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/StatusButtonRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("11_ya4ey")
+
+[node name="ConnectionStatusContent" type="HBoxContainer" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/StatusButtonRow/ConnectionStatusIndicator"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="ConnectionStatusIcon" type="TextureRect" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/StatusButtonRow/ConnectionStatusIndicator/ConnectionStatusContent"]
+unique_name_in_owner = true
+texture_filter = 4
+custom_minimum_size = Vector2(16, 16)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ConnectionStatusText" type="Label" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/StatusButtonRow/ConnectionStatusIndicator/ConnectionStatusContent"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("15_chat_font")
+vertical_alignment = 1
+
+[node name="ReconnectButton" type="Button" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/StatusButtonRow"]
+unique_name_in_owner = true
+texture_filter = 4
+mouse_default_cursor_shape = 2
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_fonts/font = ExtResource("15_chat_font")
+theme_override_constants/icon_max_width = 14
+theme_override_styles/normal = ExtResource("11_ya4ey")
+theme_override_styles/hover = ExtResource("11_ya4ey")
+theme_override_styles/pressed = ExtResource("11_ya4ey")
+theme_override_styles/disabled = ExtResource("11_ya4ey")
+theme_override_styles/focus = ExtResource("16_chat_toggle_focus")
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+tooltip_text = "重连"
+script = ExtResource("13_global_chat_toggle")
+
+[node name="PlayerListButton" type="Button" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/StatusButtonRow"]
+unique_name_in_owner = true
+texture_filter = 4
+mouse_default_cursor_shape = 2
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_fonts/font = ExtResource("15_chat_font")
+theme_override_constants/icon_max_width = 20
+theme_override_styles/normal = ExtResource("11_ya4ey")
+tooltip_text = "玩家列表"
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+
+[node name="PrivacyModeToggle" type="Button" parent="ChatOverlayLayer/ChatControl/TopLeftActions"]
+unique_name_in_owner = true
+texture_filter = 4
+mouse_default_cursor_shape = 2
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_fonts/font = ExtResource("15_chat_font")
+theme_override_constants/icon_max_width = 20
+theme_override_styles/normal = ExtResource("11_ya4ey")
+theme_override_styles/hover = ExtResource("11_ya4ey")
+theme_override_styles/focus = ExtResource("16_chat_toggle_focus")
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+tooltip_text = "隐身"
+script = ExtResource("20_privacy_mode_toggle")
+
+[node name="NametagStyleButton" type="Button" parent="ChatOverlayLayer/ChatControl/TopLeftActions"]
+unique_name_in_owner = true
+texture_filter = 4
+mouse_default_cursor_shape = 2
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_fonts/font = ExtResource("15_chat_font")
+theme_override_constants/icon_max_width = 26
+theme_override_styles/normal = ExtResource("11_ya4ey")
+theme_override_styles/hover = ExtResource("11_ya4ey")
+theme_override_styles/focus = ExtResource("16_chat_toggle_focus")
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+tooltip_text = "头顶昵称样式"
+
+[node name="AudioMuteToggle" type="Button" parent="ChatOverlayLayer/ChatControl/TopLeftActions"]
+unique_name_in_owner = true
+texture_filter = 4
+mouse_default_cursor_shape = 2
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_fonts/font = ExtResource("15_chat_font")
+theme_override_constants/icon_max_width = 20
+theme_override_styles/normal = ExtResource("11_ya4ey")
+theme_override_styles/hover = ExtResource("11_ya4ey")
+theme_override_styles/focus = ExtResource("16_chat_toggle_focus")
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+tooltip_text = "静音"
+
+[node name="FullscreenButton" type="Button" parent="ChatOverlayLayer/ChatControl/TopLeftActions"]
+unique_name_in_owner = true
+texture_filter = 4
+mouse_default_cursor_shape = 2
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+focus_mode = 0
+theme_override_fonts/font = ExtResource("15_chat_font")
+theme_override_constants/icon_max_width = 20
+theme_override_styles/normal = ExtResource("11_ya4ey")
+theme_override_styles/hover = ExtResource("11_ya4ey")
+theme_override_styles/focus = ExtResource("16_chat_toggle_focus")
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+tooltip_text = "全屏"
+icon = ExtResource("fullscreen_icon")
+
+[node name="ServerPlayerCountRow" type="HBoxContainer" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox"]
+custom_minimum_size = Vector2(200, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+mouse_behavior_recursive = 2
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="ServerPlayerCountSpacer" type="Control" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/ServerPlayerCountRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="ServerPlayerCountPanel" type="PanelContainer" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/ServerPlayerCountRow"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("11_ya4ey")
+
+[node name="ServerPlayerCount" type="Label" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/ServerPlayerCountRow/ServerPlayerCountPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("15_chat_font")
+text = "服务器总人数 —"
+horizontal_alignment = 2
+
+[node name="WorldPlayerCountRow" type="HBoxContainer" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox"]
+custom_minimum_size = Vector2(200, 26)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+mouse_behavior_recursive = 2
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="WorldPlayerCountSpacer" type="Control" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/WorldPlayerCountRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="WorldPlayerCountPanel" type="PanelContainer" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/WorldPlayerCountRow"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("11_ya4ey")
+
+[node name="WorldPlayerCount" type="Label" parent="ChatOverlayLayer/ChatControl/MultiplayerStatusVBox/WorldPlayerCountRow/WorldPlayerCountPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_fonts/font = ExtResource("15_chat_font")
+text = "当前地图人数 —"
+horizontal_alignment = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="ChatOverlayLayer/ChatControl" unique_id=824267174]
 layout_mode = 1
@@ -690,29 +1087,166 @@ mouse_behavior_recursive = 2
 theme_override_constants/separation = 0
 alignment = 2
 
-[node name="MessageContainer" type="VBoxContainer" parent="ChatOverlayLayer/ChatControl/VBoxContainer" unique_id=1663354205]
+[node name="CurrentLocationRow" type="HBoxContainer" parent="ChatOverlayLayer/ChatControl/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+mouse_behavior_recursive = 2
+theme_override_constants/separation = 0
+
+[node name="MessageStack" type="MarginContainer" parent="ChatOverlayLayer/ChatControl/VBoxContainer/CurrentLocationRow"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+mouse_filter = 2
+mouse_behavior_recursive = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="ChatHistoryScroll" type="Container" parent="ChatOverlayLayer/ChatControl/VBoxContainer/CurrentLocationRow/MessageStack"]
+unique_name_in_owner = true
+layout_mode = 2
+clip_contents = true
+
+[node name="ChatVirtualContent" type="Container" parent="ChatOverlayLayer/ChatControl/VBoxContainer/CurrentLocationRow/MessageStack/ChatHistoryScroll"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(320, 0)
+layout_mode = 0
+mouse_filter = 1
+
+[node name="MessageContainer" type="Container" parent="ChatOverlayLayer/ChatControl/VBoxContainer/CurrentLocationRow/MessageStack/ChatHistoryScroll/ChatVirtualContent" unique_id=1663354205]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 0
+mouse_filter = 2
+mouse_behavior_recursive = 1
+
+[node name="ChatSelection" type="RichTextLabel" parent="ChatOverlayLayer/ChatControl/VBoxContainer/CurrentLocationRow/MessageStack/ChatHistoryScroll/ChatVirtualContent"]
+unique_name_in_owner = true
+texture_filter = 4
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 0
+mouse_filter = 0
+mouse_behavior_recursive = 2
+focus_mode = 1
+theme_override_colors/default_color = Color(1, 1, 1, 0)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0)
+theme_override_colors/font_selected_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
+theme_override_constants/shadow_outline_size = 0
+theme_override_constants/table_h_separation = 0
+theme_override_constants/table_v_separation = 0
+theme_override_fonts/normal_font = ExtResource("15_chat_font")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_chat_selection")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_chat_selection")
+fit_content = true
+scroll_active = false
+selection_enabled = true
+context_menu_enabled = true
+deselect_on_focus_loss_enabled = false
+autowrap_mode = 3
+
+[node name="LocationSpacer" type="Control" parent="ChatOverlayLayer/ChatControl/VBoxContainer/CurrentLocationRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="CurrentLocationModules" type="VBoxContainer" parent="ChatOverlayLayer/ChatControl/VBoxContainer/CurrentLocationRow"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+mouse_filter = 2
+mouse_behavior_recursive = 2
+theme_override_constants/separation = 0
+
+[node name="CurrentLocationLocalized" type="RichTextLabel" parent="ChatOverlayLayer/ChatControl/VBoxContainer/CurrentLocationRow/CurrentLocationModules"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 8
+mouse_filter = 0
+mouse_behavior_recursive = 2
+focus_mode = 0
+horizontal_alignment = 2
+theme_override_fonts/normal_font = ExtResource("15_chat_font")
+theme_override_styles/normal = ExtResource("11_ya4ey")
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+
+[node name="CurrentLocationEnglish" type="RichTextLabel" parent="ChatOverlayLayer/ChatControl/VBoxContainer/CurrentLocationRow/CurrentLocationModules"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 8
+mouse_filter = 0
+mouse_behavior_recursive = 2
+focus_mode = 0
+horizontal_alignment = 2
+theme_override_fonts/normal_font = ExtResource("15_chat_font")
+theme_override_styles/normal = ExtResource("11_ya4ey")
+fit_content = true
+scroll_active = false
+autowrap_mode = 3
+
+[node name="ChatInputRow" type="HBoxContainer" parent="ChatOverlayLayer/ChatControl/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 0
-alignment = 2
 
-[node name="ChatField" type="LineEdit" parent="ChatOverlayLayer/ChatControl/VBoxContainer" unique_id=1983333640]
+[node name="ChatFieldFrame" type="PanelContainer" parent="ChatOverlayLayer/ChatControl/VBoxContainer/ChatInputRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_styles/panel = ExtResource("11_ya4ey")
+
+[node name="ChatField" type="LineEdit" parent="ChatOverlayLayer/ChatControl/VBoxContainer/ChatInputRow/ChatFieldFrame" unique_id=1983333640]
+script = ExtResource("atomic_chat_edit")
 unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 1
-theme_override_fonts/font = ExtResource("10_choun")
-theme_override_styles/normal = ExtResource("11_ya4ey")
-theme_override_styles/focus = ExtResource("12_eb6dy")
-max_length = 100
+theme_override_fonts/font = ExtResource("15_chat_font")
+max_length = 0
 emoji_menu_enabled = false
 backspace_deletes_composite_character_enabled = true
 caret_blink = true
 
+[node name="GlobalChatToggle" type="Button" parent="ChatOverlayLayer/ChatControl/VBoxContainer/ChatInputRow"]
+unique_name_in_owner = true
+texture_filter = 4
+custom_minimum_size = Vector2(28, 0)
+layout_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 2
+theme_override_colors/font_pressed_color = Color(0.08, 0.08, 0.08, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.08, 0.08, 0.08, 1)
+theme_override_constants/icon_max_width = 20
+theme_override_styles/normal = ExtResource("11_ya4ey")
+theme_override_styles/hover = ExtResource("11_ya4ey")
+theme_override_styles/pressed = ExtResource("14_chat_toggle_on")
+theme_override_styles/hover_pressed = ExtResource("14_chat_toggle_on")
+theme_override_styles/focus = ExtResource("16_chat_toggle_focus")
+toggle_mode = true
+icon_alignment = 1
+vertical_icon_alignment = 1
+expand_icon = true
+tooltip_text = "公屏聊天"
+script = ExtResource("13_global_chat_toggle")
+
+[node name="WindowModeController" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("window_modes")
+
 [connection signal="resolution_changed" from="RPGMakerPlayer" to="RPGMakerPlayer" method="_on_resolution_changed"]
-[connection signal="item_selected" from="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/GameOptions/MarginContainer/PanelContainer/VBoxContainer/MarginContainer/VBoxContainer/WindowScale" to="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen" method="_on_window_scale_changed"]
+[connection signal="video_settings_changed" from="RPGMakerPlayer" to="RPGMakerPlayer" method="_on_video_settings_changed"]
 [connection signal="toggled" from="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen/VBoxContainer/Multiplayer/MarginContainer/VBoxContainer/HBoxContainer3/MpEnable" to="GodotMenuLayer/SubViewportContainer/SubViewport/SetupScreen" method="_on_mp_enable_toggled"]
-[connection signal="editing_toggled" from="ChatOverlayLayer/ChatControl/VBoxContainer/ChatField" to="ChatOverlayLayer/ChatControl" method="_on_chat_field_editing_toggled"]
-[connection signal="focus_exited" from="ChatOverlayLayer/ChatControl/VBoxContainer/ChatField" to="ChatOverlayLayer/ChatControl" method="_on_chat_field_focus_exited"]
-[connection signal="text_submitted" from="ChatOverlayLayer/ChatControl/VBoxContainer/ChatField" to="ChatOverlayLayer/ChatControl" method="_on_chat_field_text_submitted"]
+[connection signal="text_submitted" from="ChatOverlayLayer/ChatControl/VBoxContainer/ChatInputRow/ChatFieldFrame/ChatField" to="ChatOverlayLayer/ChatControl" method="_on_chat_field_text_submitted"]
+[connection signal="chat_open_changed" from="ChatOverlayLayer/ChatControl" to="WorldLocationBannerLayer/WorldLocationBanner" method="_on_chat_open_changed"]
+[connection signal="location_presentation_changed" from="ChatOverlayLayer/ChatControl" to="WorldLocationBannerLayer/WorldLocationBanner" method="_on_location_presentation_changed"]

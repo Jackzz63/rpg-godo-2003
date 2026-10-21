@@ -1121,14 +1121,34 @@ void Player::LoadFonts() {
 		}
 	}
 
+	FontRef compact_name_text;
 	auto name_text = FileFinder::OpenFont("NameText");
 	if (name_text) {
-		Font::SetNameText(Font::CreateFtFont(std::move(name_text), 11, false, false), false);
+		compact_name_text = Font::CreateFtFont(std::move(name_text), 11, false, false);
+	}
+	if (!compact_name_text) {
+		compact_name_text = Font::CreateNameTextFallback(false, 11);
+	}
+	if (compact_name_text) {
+		Font::SetNameText(compact_name_text, false);
 	}
 
-	auto name_text_2 = FileFinder::OpenFont("TinyUnicode");
+	FontRef slim_name_text;
+	auto name_text_2 = FileFinder::OpenFont("NameText2");
 	if (name_text_2) {
-		Font::SetNameText(Font::CreateFtFont(std::move(name_text_2), 13, false, false), true);
+		slim_name_text = Font::CreateFtFont(std::move(name_text_2), 13, false, false);
+	}
+	if (!slim_name_text) {
+		auto tiny_unicode = FileFinder::OpenFont("TinyUnicode");
+		if (tiny_unicode) {
+			slim_name_text = Font::CreateFtFont(std::move(tiny_unicode), 13, false, false);
+		}
+	}
+	if (!slim_name_text) {
+		slim_name_text = Font::CreateNameTextFallback(true, 13);
+	}
+	if (slim_name_text) {
+		Font::SetNameText(slim_name_text, true);
 	}
 #endif
 }

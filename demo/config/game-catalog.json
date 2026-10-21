@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "yno-builtins",
+  "catalogRole": "builtInDefaults",
+  "locationsRoot": "res://config/locations",
+  "titleMatching": {
+    "unicodeNormalization": "NFKC",
+    "caseInsensitive": true,
+    "ignoreUnicodeWhitespace": true,
+    "preservePunctuation": true,
+    "allowSubstringMatch": false,
+    "rejectAmbiguousMatches": true
+  },
+  "games": {
+    "unconscious": {
+      "canonicalTitle": "Collective Unconscious",
+      "titleAliases": [
+        "Collective Unconscious",
+        "CollectiveUnconscious"
+      ],
+      "locationsSlug": "unconscious"
+    }
+  }
+}

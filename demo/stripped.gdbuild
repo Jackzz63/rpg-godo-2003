@@ -1,7 +1,7 @@
 {
 	"disabled_build_options": {
 		"d3d12": false,
-		"disable_3d": true,
+		"disable_3d": false,
 		"disable_navigation_2d": true,
 		"disable_navigation_3d": true,
 		"disable_physics_3d": true,

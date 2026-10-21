@@ -19,6 +19,7 @@
 #define EP_AUDIO_DECODER_MIDI_H
 
 #include <memory>
+#include <atomic>
 #include "audio_decoder_base.h"
 #include "midisequencer.h"
 #include "audio_midi.h"
@@ -28,7 +29,8 @@
  */
 class AudioDecoderMidi final : public AudioDecoderBase, public midisequencer::output {
 public:
-	AudioDecoderMidi(std::unique_ptr<MidiDecoder> mididec);
+	AudioDecoderMidi(std::unique_ptr<MidiDecoder> mididec,
+		const std::atomic<int>* native_global_volume = nullptr);
 	~AudioDecoderMidi();
 
 	/**
@@ -64,6 +66,8 @@ public:
 	 * @param volume (from 0-100)
 	 */
 	void SetVolume(int volume) override;
+	// Output-only state; callers serialize with the Native MIDI thread.
+	void SetOutputMuted(bool muted);
 
 	/**
 	 * Prepares a volume fade in/out effect.
@@ -169,6 +173,9 @@ private:
 	int FillBuffer(uint8_t* buffer, int length) override;
 
 	void SendMessageToAllChannels(uint32_t midi_msg);
+	void RefreshChannelVolumes(bool preserve_lsb = false);
+	void SendChannelVolume(int channel);
+	float CurrentGlobalVolume() const;
 
 	// midisequencer::output interface
 	void midi_message(int, uint_least32_t message) override;
@@ -184,6 +191,8 @@ private:
 	bool paused = false;
 	float volume = 0.0f;
 	float global_volume = 1.0f; // only used by midiout
+	const std::atomic<int>* native_global_volume;
+	bool output_muted = false;
 	StereoVolume log_volume = {0.0f, 0.0f}; // as used by RPG_RT, for Midi decoder without event support
 	bool loops_to_end = false;
 
@@ -195,6 +204,7 @@ private:
 	int frequency = EP_MIDI_FREQ;
 
 	std::array<uint8_t, 16> channel_volumes;
+	std::array<uint8_t, 16> channel_volume_lsb{};
 
 	struct MidiTempoData {
 		MidiTempoData(const AudioDecoderMidi* midi, uint32_t cur_tempo, const MidiTempoData* prev = nullptr);

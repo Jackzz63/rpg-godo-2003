@@ -158,7 +158,12 @@ void Scene::MainFunction() {
 	// The continuation could have caused a new async wait condition, or
 	// it could have changed the scene.
 	if (!IsAsyncPending() && Scene::instance.get() == this) {
-		if (!init) {
+		// A direct Player::Exit()/Graphics::Quit() tears down the scene stack
+		// without giving the outgoing scene another MainFunction() call. In that
+		// case the function-local flag can still be true when a new game pushes
+		// its first scene. The pending push/pop operation is the authoritative
+		// indication that the current scene still needs Start()/Continue().
+		if (!init || push_pop_operation != 0) {
 			auto prev_scene = Graphics::UpdateSceneCallback();
 			auto prev_scene_type = prev_scene ? prev_scene->type : Null;
 

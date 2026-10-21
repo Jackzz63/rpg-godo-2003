@@ -1,0 +1,9 @@
+[gd_resource type="StyleBoxTexture" format=3]
+
+[ext_resource type="Texture2D" path="res://resources/orchidmantis_system_celestial.png" id="1_background"]
+
+[resource]
+texture = ExtResource("1_background")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+region_rect = Rect2(0, 0, 32, 32)

@@ -115,8 +115,9 @@ static bool midimsg_validate(uint32_t msg) {
 	return true;
 }
 
-AudioDecoderMidi::AudioDecoderMidi(std::unique_ptr<MidiDecoder> mididec)
-	: mididec(std::move(mididec)) {
+AudioDecoderMidi::AudioDecoderMidi(std::unique_ptr<MidiDecoder> mididec,
+	const std::atomic<int>* native_volume)
+	: native_global_volume(native_volume), mididec(std::move(mididec)) {
 	seq = std::make_unique<midisequencer::sequencer>();
 	channel_volumes.fill(127);
 	midi_requested_channel_pans.fill(64);
@@ -169,18 +170,39 @@ bool AudioDecoderMidi::Open(Filesystem_Stream::InputStream stream) {
 
 void AudioDecoderMidi::Pause() {
 	paused = true;
-	for (int i = 0; i < 16; i++) {
-		uint32_t msg = midimsg_volume(i, 0);
-		mididec->SendMidiMessage(msg);
-	}
+	RefreshChannelVolumes(true);
 }
 
 void AudioDecoderMidi::Resume() {
 	paused = false;
-	for (int i = 0; i < 16; i++) {
-		uint32_t msg = midimsg_volume(i, static_cast<uint8_t>(channel_volumes[i] * volume * global_volume));
-		mididec->SendMidiMessage(msg);
+	RefreshChannelVolumes();
+}
+
+float AudioDecoderMidi::CurrentGlobalVolume() const {
+	return native_global_volume
+		? native_global_volume->load(std::memory_order_relaxed) / 100.0f : 1.0f;
+}
+
+void AudioDecoderMidi::SetOutputMuted(bool muted) {
+	output_muted = muted;
+	RefreshChannelVolumes(true);
+}
+
+void AudioDecoderMidi::SendChannelVolume(int channel) {
+	const bool silent = paused || output_muted || volume == 0.0f || global_volume == 0.0f;
+	const auto effective = silent ? 0 : static_cast<uint8_t>(channel_volumes[channel] * volume * global_volume);
+	mididec->SendMidiMessage(midimsg_volume(channel, effective));
+	if (native_global_volume) {
+		// CC39 can make a zero CC7 nonzero on 14-bit volume devices.
+		mididec->SendMidiMessage(midimsg_make(midi_event_control_change, channel, 39,
+			silent ? 0 : channel_volume_lsb[channel]));
 	}
+}
+
+void AudioDecoderMidi::RefreshChannelVolumes(bool preserve_lsb) {
+	global_volume = CurrentGlobalVolume();
+	if (!preserve_lsb) channel_volume_lsb.fill(0);
+	for (int channel = 0; channel < 16; ++channel) SendChannelVolume(channel);
 }
 
 StereoVolume AudioDecoderMidi::GetVolume() const {
@@ -198,10 +220,7 @@ void AudioDecoderMidi::SetVolume(int new_volume) {
 	fade_steps = 0;
 
 	volume = static_cast<float>(new_volume) / 100.0f;
-	for (int i = 0; i < 16; i++) {
-		uint32_t msg = midimsg_volume(i, static_cast<uint8_t>(channel_volumes[i] * volume * global_volume));
-		mididec->SendMidiMessage(msg);
-	}
+	RefreshChannelVolumes();
 
 	ApplyLogVolume();
 }
@@ -268,10 +287,7 @@ void AudioDecoderMidi::Update(std::chrono::microseconds delta) {
 	if (fade_steps > 0 && mtime - last_fade_mtime > 0.1s) {
 		volume = Utils::Clamp<float>(volume + delta_volume_step, 0.0f, 1.0f);
 		ApplyLogVolume();
-		for (int i = 0; i < 16; i++) {
-			uint32_t msg = midimsg_volume(i, static_cast<uint8_t>(channel_volumes[i] * volume * global_volume));
-			mididec->SendMidiMessage(msg);
-		}
+		RefreshChannelVolumes();
 		last_fade_mtime = mtime;
 		fade_steps -= 1;
 	}
@@ -279,20 +295,15 @@ void AudioDecoderMidi::Update(std::chrono::microseconds delta) {
 
 void AudioDecoderMidi::UpdateMidi(std::chrono::microseconds delta) {
 	// Only called when MidiOut is used
+	// A delayed SysEx keeps its buffers and following messages in output order.
+	if (!mididec->FlushOutput()) return;
+	if (CurrentGlobalVolume() != global_volume) RefreshChannelVolumes();
 
 	if (paused) {
 		return;
 	}
 
 	mtime += std::chrono::microseconds(static_cast<int>(delta.count() * pitch / 100));
-
-	if (Audio().BGM_GetGlobalVolume() / 100.0f != global_volume) {
-		global_volume = Audio().BGM_GetGlobalVolume() / 100.0f;
-		for (int i = 0; i < 16; i++) {
-			uint32_t msg = midimsg_volume(i, static_cast<uint8_t>(channel_volumes[i] * volume * global_volume));
-			mididec->SendMidiMessage(msg);
-		}
-	}
 
 	Update(delta);
 
@@ -404,8 +415,15 @@ void AudioDecoderMidi::midi_message(int, uint_least32_t message) {
 	if (event_type == midi_event_control_change && value1 == midi_control_volume) {
 		// Adjust channel volume
 		channel_volumes[channel] = value2;
-		// Send the modified volume to midiout
-		message = midimsg_volume(channel, static_cast<uint8_t>(value2 * volume * global_volume));
+		channel_volume_lsb[channel] = 0;
+		global_volume = CurrentGlobalVolume();
+		SendChannelVolume(channel);
+		return;
+	} else if (event_type == midi_event_control_change && value1 == 39) {
+		channel_volume_lsb[channel] = value2;
+		if (output_muted || paused || volume == 0.0f || CurrentGlobalVolume() == 0.0f) {
+			message = midimsg_make(midi_event_control_change, channel, 39, 0);
+		}
 	} else if (event_type == midi_event_control_change && value1 == midi_control_pan) {
 		midi_requested_channel_pans[channel] = value2;
 		message = midimsg_pan(channel, ChannelPan(value2));
@@ -417,6 +435,7 @@ void AudioDecoderMidi::midi_message(int, uint_least32_t message) {
 
 void AudioDecoderMidi::sysex_message(int, const void* data, std::size_t size) {
 	mididec->SendSysExMessage(reinterpret_cast<const uint8_t*>(data), size);
+	if (native_global_volume && (output_muted || paused)) RefreshChannelVolumes(true);
 }
 
 void AudioDecoderMidi::meta_event(int event, const void* data, std::size_t size) {
@@ -458,6 +477,7 @@ void AudioDecoderMidi::reset() {
 		midi_msg = midimsg_make(midi_event_control_change, channel, midi_set_reg_param_lower, 0);
 		mididec->SendMidiMessage(midi_msg);
 	}
+	if (native_global_volume && (output_muted || paused)) RefreshChannelVolumes(true);
 }
 
 void AudioDecoderMidi::reset_tempos_after_loop() {

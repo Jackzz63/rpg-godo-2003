@@ -22,6 +22,9 @@
 
  // Headers
 #include <string>
+#include <deque>
+#include <memory>
+#include <vector>
 #include <windows.h>
 #include <mmsystem.h>
 #include "audio_midi.h"
@@ -36,11 +39,20 @@ public:
 
 	void SendMidiMessage(uint32_t message) override;
 	void SendSysExMessage(const uint8_t* data, size_t size) override;
+	bool FlushOutput() override;
 	std::string GetName() override;
 	bool IsInitialized() const;
 
 private:
 	HMIDIOUT midi_out;
+	struct PendingMessage {
+		uint32_t short_message = 0;
+		std::vector<uint8_t> data;
+		MIDIHDR header{};
+		bool prepared = false;
+	};
+	// Headers and data remain at stable addresses until WinMM releases them.
+	std::deque<std::unique_ptr<PendingMessage>> pending;
 };
 #endif
 

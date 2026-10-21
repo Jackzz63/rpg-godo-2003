@@ -1,8 +1,9 @@
 [gd_resource type="Theme" format=3 uid="uid://dx13y3513lj8e"]
 
-[ext_resource type="FontFile" uid="uid://dh8uf0t6kqv8" path="res://resources/RM2000.ttf" id="1_cjfk0"]
+[ext_resource type="FontVariation" uid="uid://cbwdompm0yp7c" path="res://resources/launcher_font.tres" id="1_cjfk0"]
 [ext_resource type="Texture2D" uid="uid://dcw31o6ckjsa3" path="res://resources/orchidmantis_system_celestial.png" id="1_e1x85"]
 [ext_resource type="StyleBox" uid="uid://ca3cj8e1se5t3" path="res://resources/borders_texture.tres" id="2_886mr"]
+[ext_resource type="Script" path="res://cogs/system_ui_background.gd" id="3_background"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_owntx"]
 texture = ExtResource("1_e1x85")
@@ -28,19 +29,37 @@ region_rect = Rect2(32, 0, 32, 32)
 modulate_color = Color(0.5609549, 0.5609549, 0.5609549, 1)
 draw_center = false
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_jyhfs"]
+[sub_resource type="StyleBox" id="StyleBoxTexture_jyhfs"]
+script = ExtResource("3_background")
 texture = ExtResource("1_e1x85")
-axis_stretch_horizontal = 1
-axis_stretch_vertical = 1
 region_rect = Rect2(0, 0, 32, 32)
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cjfk0"]
+[sub_resource type="StyleBox" id="StyleBoxTexture_cjfk0"]
+script = ExtResource("3_background")
 texture = ExtResource("1_e1x85")
-axis_stretch_horizontal = 1
-axis_stretch_vertical = 1
 region_rect = Rect2(0, 0, 32, 32)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
+content_margin_left = 8.0
+content_margin_top = 5.0
+content_margin_right = 8.0
+content_margin_bottom = 5.0
+bg_color = Color(0.035, 0.04, 0.055, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.78, 0.82, 0.9, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+shadow_color = Color(0, 0, 0, 0.72)
+shadow_size = 3
+anti_aliasing = false
 
 [resource]
+default_font = ExtResource("1_cjfk0")
 Button/fonts/font = ExtResource("1_cjfk0")
 Button/styles/disabled = ExtResource("2_886mr")
 Button/styles/disabled_mirrored = ExtResource("2_886mr")
@@ -61,3 +80,9 @@ MarginContainer/constants/margin_top = 4
 Panel/styles/panel = SubResource("StyleBoxTexture_jyhfs")
 PanelContainer/styles/panel = SubResource("StyleBoxTexture_cjfk0")
 RichTextLabel/fonts/normal_font = ExtResource("1_cjfk0")
+TooltipLabel/colors/font_color = Color(0.96, 0.97, 1, 1)
+TooltipLabel/colors/font_outline_color = Color(0, 0, 0, 1)
+TooltipLabel/constants/outline_size = 1
+TooltipLabel/font_sizes/font_size = 16
+TooltipLabel/fonts/font = ExtResource("1_cjfk0")
+TooltipPanel/styles/panel = SubResource("StyleBoxFlat_tooltip")

@@ -1,0 +1,14 @@
+[gd_resource type="FontVariation" format=3 uid="uid://cbwdompm0yp7c"]
+
+[ext_resource type="FontFile" uid="uid://dh8uf0t6kqv8" path="res://resources/RM2000.ttf" id="1_rm2000"]
+[ext_resource type="FontFile" uid="uid://cpn8pt67tcy3h" path="res://resources/NotoSansSC-VF.ttf" id="2_noto"]
+
+[sub_resource type="FontVariation" id="FontVariation_noto_regular"]
+base_font = ExtResource("2_noto")
+variation_opentype = {
+2003265652: 400.0
+}
+
+[resource]
+fallbacks = Array[Font]([SubResource("FontVariation_noto_regular")])
+base_font = ExtResource("1_rm2000")

@@ -19,6 +19,7 @@
 #define EP_AUDIO_GENERIC_MIDITHREAD_H
 
 #include <memory>
+#include <atomic>
 #include "system.h"
 #include "audio_decoder_midi.h"
 
@@ -27,7 +28,6 @@ namespace Filesystem_Stream {
 }
 
 #ifdef HAVE_NATIVE_MIDI
-#include <atomic>
 #include <mutex>
 #include <thread>
 
@@ -39,13 +39,15 @@ namespace Filesystem_Stream {
  */
 class GenericAudioMidiOut final {
 public:
-	GenericAudioMidiOut();
+	explicit GenericAudioMidiOut(const std::atomic<int>* global_volume = nullptr);
 	~GenericAudioMidiOut();
 
 	AudioDecoderMidi& GetMidiOut();
 
 	void LockMutex();
 	void UnlockMutex();
+	void lock() { LockMutex(); }
+	void unlock() { UnlockMutex(); }
 
 	void UpdateMidiOut(std::chrono::microseconds delta);
 
@@ -68,12 +70,14 @@ private:
 // Stub implementation for systems without native midi support
 class GenericAudioMidiOut final {
 public:
-	GenericAudioMidiOut() {}
+	explicit GenericAudioMidiOut(const std::atomic<int>* = nullptr) {}
 
 	AudioDecoderMidi& GetMidiOut();
 
 	void LockMutex() {}
 	void UnlockMutex() {}
+	void lock() {}
+	void unlock() {}
 
 	void UpdateMidiOut(int) {}
 

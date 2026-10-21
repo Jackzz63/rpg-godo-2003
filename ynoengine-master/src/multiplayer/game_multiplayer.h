@@ -22,6 +22,8 @@ public:
 
 	void Connect(int map_id, bool room_switch = false);
 	void Initialize();
+	void ClearRemotePlayerObjectsImmediate();
+	void ClearRemotePlayersImmediate();
 	void Quit();
 	void Update();
 	void SendBasicData();
@@ -64,6 +66,7 @@ public:
 	YNOConnection connection;
 	bool session_active{ false }; // if true, it will automatically reconnect when disconnected
 	bool session_connected{ false };
+	bool server_global_variables_active{ false };
 	bool switching_room{ true }; // when client enters new room, but not synced to server
 	bool switched_room{ false }; // determines whether new connected players should fade in
 	int host_id{-1};
@@ -137,6 +140,7 @@ public:
 	void GodotMpRemovePlayer(int id);
 
 	void GodotMpMovePlayer(int id, int x, int y);
+	void GodotMpJumpPlayer(int id, int x, int y);
 
 	void GodotMpSetFacing(int id, int facing);
 

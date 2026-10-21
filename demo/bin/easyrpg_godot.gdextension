@@ -8,10 +8,10 @@ compatibility_minimum = "4.5"
 macos.debug   = "res://bin/libeasyrpg_godot.macos.debugd.dylib"
 macos.release = "res://bin/libeasyrpg_godot.macos.release.dylib"
 
-windows.debug.x86_64   = "res://bin/easyrpg_godotd.dll"
+windows.debug.x86_64   = "res://bin/easyrpg_godot.dll"
 windows.release.x86_64 = "res://bin/easyrpg_godot.dll"
 
-linux.debug.x86_64   = "res://bin/libeasyrpg_godotd.so"
+linux.debug.x86_64   = "res://bin/libeasyrpg_godot.so"
 linux.release.x86_64 = "res://bin/libeasyrpg_godot.so"
 
 android.debug.arm64   = "res://bin/libeasyrpg_godotd_arm64.so"

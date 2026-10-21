@@ -147,3 +147,6 @@ eboot.bin
 *.pem
 *.keystore
 *.jks
+
+# Included dependency source for this application.
+!/lib/liblcf/

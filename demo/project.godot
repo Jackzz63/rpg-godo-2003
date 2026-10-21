@@ -15,23 +15,31 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="RpgGodo2003"
-run/main_scene="uid://dqclyd3klu6qq"
+run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
-boot_splash/show_image=false
+boot_splash/show_image=true
 boot_splash/use_filter=false
-config/icon="uid://bo8upe3r86d2e"
+boot_splash/image.android="res://platform/android/resources/boot_splash_2x.png"
+boot_splash/stretch_mode.android=0
+boot_splash/use_filter.android=true
+config/icon="res://icon.png"
+config/quit_on_go_back.android=false
 
 [autoload]
 
+ClientPerf="*res://cogs/client_performance.gd"
+UiScale="*res://cogs/physical_ui_scaler.gd"
 Transition="*uid://cxbmv4cldqgdq"
 LimboConsole="*uid://cisblm1xppxgv"
-MpEvents="*uid://dm5v6rlysi7lk"
+MpEvents="*res://cogs/multiplayer/events.gd"
 
 [display]
 
+window/size/enable_toggle_fullscreen_shortcut=false
 window/size/viewport_width=640
 window/size/viewport_height=480
-window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation.android=0
 
 [editor_plugins]
 
@@ -41,7 +49,7 @@ enabled=PackedStringArray("res://addons/easy_transitions/plugin.cfg", "res://add
 
 limbo_console_toggle={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":96,"physical_keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":96,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
 ]
 }
 limbo_auto_complete_reverse={
@@ -66,7 +74,7 @@ game_chat_release={
 }
 game_chat_toggle={
 "deadzone": 0.2,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":72,"physical_keycode":0,"key_label":0,"unicode":104,"location":0,"echo":false,"script":null)
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":true,"meta_pressed":false,"pressed":false,"keycode":72,"physical_keycode":0,"key_label":0,"unicode":104,"location":0,"echo":false,"script":null)
 ]
 }
 

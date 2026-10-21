@@ -44,8 +44,14 @@ func size() -> int:
 
 
 func trim(p_max_size: int) -> void:
-	if _entries.size() > p_max_size:
-		_entries.slice(p_max_size - _entries.size())
+	var max_size := maxi(0, p_max_size)
+	if _entries.size() <= max_size:
+		return
+	if max_size == 0:
+		_entries.clear()
+	else:
+		_entries = _entries.slice(_entries.size() - max_size)
+	_is_dirty = true
 	_reset_iterators()
 
 

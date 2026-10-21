@@ -26,10 +26,15 @@ public:
 	using ParameterList = std::vector<std::string_view>;
 
 	void SendPacket(const C2SPacket& p);
+#if defined(PLAYER_MULTIPLAYER_CALLBACK_ONLY)
+	template<typename T, typename... Args>
+	void SendPacketAsync(Args...) {}
+#else
 	template<typename T, typename... Args>
 	void SendPacketAsync(Args... args) {
 		m_queue.emplace(new T(args...));
 	}
+#endif
 
 	virtual void Open(std::string_view uri) = 0;
 	virtual void Close();

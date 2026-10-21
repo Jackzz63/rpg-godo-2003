@@ -61,28 +61,31 @@ func chat_command(enabled: bool) -> void:
 		Log.warn("You are not connected to multiplayer!")
 		return
 	mp_node.set_enable_chat(enabled)
-	var chat_layer: CanvasLayer = %ChatOverlayLayer
-	var chat_ctrl: Node = %ChatControl
-	var chat_field: LineEdit = %ChatField
-	if enabled:
-		chat_layer.visible     = true
-		chat_field.editable    = true
-		chat_ctrl.chat_enabled = true
-	else:
-		chat_layer.visible  = false
-		chat_field.editable = false
-		chat_field.visible  = false
-		# just to be ABSOLUTELY safe i guess
-		chat_field.release_focus()
-		chat_ctrl.chat_enabled = false
+	var chat_ctrl := %ChatControl
+	chat_ctrl.call("_set_chat_enabled", enabled)
+
+func chat_ui_command() -> void:
+	var chat_ctrl := %ChatControl
+	var enabled := not bool(chat_ctrl.chat_enabled)
+	chat_ctrl.call("_set_chat_enabled", enabled)
+	Log.info("Chat UI enabled: %s" % enabled)
+
 
 func _add_limbo_commands() -> void:
+	if LimboConsole.has_command("fullscreen"):
+		LimboConsole.unregister_command("fullscreen")
+	LimboConsole.register_command(toggle_fullscreen, "fullscreen", "Toggle the application window fullscreen mode")
 	LimboConsole.register_command(do_open_save_menu, "save", "Open save screen")
 	LimboConsole.register_command(do_open_load_menu, "load", "Open load screen")
 	LimboConsole.register_command(do_open_debug_menu, "debug", "Open debug screen")
 	LimboConsole.register_command(set_resolution_scale, "rescale", "Scales resolution to a given multiplier")
 	LimboConsole.register_command(chat_command, "chat", "Enables/disables multiplayer chat. Only works on the client.")
+	LimboConsole.register_command(chat_ui_command, "chatui", "Toggle the local chat UI without changing network chat")
 
 func _ready() -> void:
 	if OS.is_debug_build() or true:
 		_add_limbo_commands()
+
+
+func toggle_fullscreen() -> void:
+	%WindowModeController.toggle_fullscreen()

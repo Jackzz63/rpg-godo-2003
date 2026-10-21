@@ -44,9 +44,10 @@ namespace Graphics {
 	void Quit();
 
 	/**
-	 * Updates the screen.
+	 * Maintains FPS/title state and reports whether an overlay changed visually.
+	 * Hosts may run this between logical updates without drawing a new frame.
 	 */
-	void Update();
+	bool Update();
 
 	void Draw(Bitmap& dst);
 

@@ -21,46 +21,25 @@ set(PLAYER_TARGET_PLATFORM "godot" CACHE STRING "Platform: godot"  FORCE)
 set(PLAYER_AUDIO_BACKEND   "godot" CACHE STRING "Audio: godot"     FORCE)
 set(PLAYER_HAS_AUDIO       ON      CACHE BOOL   "Enable audio"     FORCE)
 set(PLAYER_BUILD_LIBLCF    ON      CACHE BOOL   "Build liblcf from source" FORCE)
-set(BUILD_SHARED_LIBS      ON      CACHE BOOL   "Static build"     FORCE)
+set(BUILD_SHARED_LIBS      ON      CACHE BOOL   "Build shared libraries"     FORCE)
 
 set(PLAYER_ENABLE_DRWAV    ON  CACHE BOOL "Built-in WAV decoder (dr_wav)"    FORCE)
 set(PLAYER_ENABLE_FMMIDI   ON  CACHE BOOL "Built-in MIDI sequencer (fmmidi)" FORCE)
 set(PLAYER_WITH_OPUS       ON  CACHE BOOL "Enable Opus via opusfile"         FORCE)
 set(PLAYER_WITH_MPG123     ON  CACHE BOOL "Enable libmpg123 (MP3 support)" FORCE)
-set(PLAYER_WITH_LIBSNDFILE ON  CACHE BOOL "Disable libsndfile"  FORCE)
-set(PLAYER_WITH_OGGVORBIS  ON  CACHE BOOL "Disable libvorbis"   FORCE)
-set(PLAYER_WITH_WILDMIDI   ON  CACHE BOOL "Disable wildmidi"    FORCE)
-set(PLAYER_WITH_FLUIDSYNTH ON  CACHE BOOL "Disable fluidsynth"  FORCE)
-set(PLAYER_WITH_FLUIDLITE  ON  CACHE BOOL "Disable fluidlite"   FORCE)
-set(PLAYER_WITH_XMP        ON  CACHE BOOL "Disable libxmp"      FORCE)
-
-set(PLAYER_BUILD_EXECUTABLE OFF) # supress execuable build
+set(PLAYER_WITH_LIBSNDFILE ON  CACHE BOOL "Enable libsndfile"  FORCE)
+set(PLAYER_WITH_OGGVORBIS  ON  CACHE BOOL "Enable libvorbis"   FORCE)
+set(PLAYER_WITH_WILDMIDI   ON  CACHE BOOL "Enable wildmidi"    FORCE)
+set(PLAYER_WITH_FLUIDSYNTH ON  CACHE BOOL "Enable fluidsynth"  FORCE)
+set(PLAYER_WITH_FLUIDLITE  ON  CACHE BOOL "Enable fluidlite"   FORCE)
+set(PLAYER_WITH_XMP        ON  CACHE BOOL "Enable libxmp"      FORCE)
 
 add_subdirectory(${YNOENGINE_DIR} ynoengine_build EXCLUDE_FROM_ALL)
 
 set(YNOENGINE_TARGET EasyRPG_Player)
 
-target_sources(${YNOENGINE_TARGET} PRIVATE
-    ${YNOENGINE_DIR}/src/platform/godot/ui.cpp
-    ${YNOENGINE_DIR}/src/platform/godot/ui.h
-    ${YNOENGINE_DIR}/src/platform/godot/audio.h
-    ${YNOENGINE_DIR}/src/platform/godot/audio.cpp
-)
-
-if(ANDROID)
-    target_sources(${YNOENGINE_TARGET} PRIVATE
-        ${YNOENGINE_DIR}/src/platform/android/android.cpp
-        ${YNOENGINE_DIR}/src/platform/android/android.h
-    )
-    target_include_directories(${YNOENGINE_TARGET} PRIVATE
-        ${YNOENGINE_DIR}/src/platform/android
-    )
-endif()
-
 target_compile_definitions(${YNOENGINE_TARGET} PUBLIC
-    PLAYER_UI=GodotUi
-    PLAYER_TARGET_GODOT=1
-    SUPPORT_AUDIO=1
+    PLAYER_MULTIPLAYER_CALLBACK_ONLY=1
 )
 
 add_subdirectory(${GODOTCPP_DIR} godotcpp_build)
@@ -126,6 +105,7 @@ elseif(ANDROID)
     set_target_properties(easyrpg_godot PROPERTIES
         PREFIX "lib"
         SUFFIX "_arm64.so"
+        DEBUG_POSTFIX "d"
     )
 else()
     # Linux

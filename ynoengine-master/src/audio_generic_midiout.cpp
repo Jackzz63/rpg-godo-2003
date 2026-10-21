@@ -50,7 +50,7 @@ static struct {
 	std::string status;
 } works;
 
-GenericAudioMidiOut::GenericAudioMidiOut() {
+GenericAudioMidiOut::GenericAudioMidiOut(const std::atomic<int>* global_volume) {
 	stop_thread.store(false);
 
 #ifdef USE_LIBRETRO
@@ -58,7 +58,7 @@ GenericAudioMidiOut::GenericAudioMidiOut() {
 	if (works.libretro) {
 		auto dec = std::make_unique<LibretroMidiOutDevice>(libretro_status);
 		if (dec->IsInitialized()) {
-			midi_out = std::make_unique<AudioDecoderMidi>(std::move(dec));
+			midi_out = std::make_unique<AudioDecoderMidi>(std::move(dec), global_volume);
 		} else {
 			works.libretro = false;
 			Output::Debug(libretro_status);
@@ -74,7 +74,7 @@ GenericAudioMidiOut::GenericAudioMidiOut() {
 	if (works.alsa) {
 		auto dec = std::make_unique<AlsaMidiOutDevice>(works.status);
 		if (dec->IsInitialized()) {
-			midi_out = std::make_unique<AudioDecoderMidi>(std::move(dec));
+			midi_out = std::make_unique<AudioDecoderMidi>(std::move(dec), global_volume);
 		} else {
 			works.alsa = false;
 			Output::Debug(works.status);
@@ -84,7 +84,7 @@ GenericAudioMidiOut::GenericAudioMidiOut() {
 	if (works.win32) {
 		auto dec = std::make_unique<Win32MidiOutDevice>(works.status);
 		if (dec->IsInitialized()) {
-			midi_out = std::make_unique<AudioDecoderMidi>(std::move(dec));
+			midi_out = std::make_unique<AudioDecoderMidi>(std::move(dec), global_volume);
 		} else {
 			works.win32 = false;
 			Output::Debug(works.status);
@@ -94,7 +94,7 @@ GenericAudioMidiOut::GenericAudioMidiOut() {
 	if (works.coreaudio) {
 		auto dec = std::make_unique<CoreAudioMidiOutDevice>(works.status);
 		if (dec->IsInitialized()) {
-			midi_out = std::make_unique<AudioDecoderMidi>(std::move(dec));
+			midi_out = std::make_unique<AudioDecoderMidi>(std::move(dec), global_volume);
 		} else {
 			works.coreaudio = false;
 			Output::Debug(works.status);
@@ -109,8 +109,8 @@ GenericAudioMidiOut::GenericAudioMidiOut() {
 
 GenericAudioMidiOut::~GenericAudioMidiOut() {
 	if (thread_started) {
-		GetMidiOut().Reset();
 		StopThread();
+		GetMidiOut().Reset();
 	}
 }
 
@@ -123,11 +123,10 @@ void GenericAudioMidiOut::UnlockMutex() {
 }
 
 void GenericAudioMidiOut::UpdateMidiOut(std::chrono::microseconds delta) {
-	LockMutex();
+	std::lock_guard<GenericAudioMidiOut> lock(*this);
 	assert(midi_out);
 
 	midi_out->UpdateMidi(delta);
-	UnlockMutex();
 }
 
 void GenericAudioMidiOut::StartThread() {

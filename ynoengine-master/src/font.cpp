@@ -642,11 +642,20 @@ void Font::SetDefault(FontRef new_default, bool use_mincho) {
 	}
 }
 
-FontRef Font::NameText() {
-	auto nametag_mode = GMI().GetNametagMode();
+namespace {
+	std::vector<uint8_t> name_text_fallback_data;
+	std::vector<uint8_t> name_text_slim_fallback_data;
+}
 
-	if (nametag_mode == Game_Multiplayer::NametagMode::COMPACT || nametag_mode == Game_Multiplayer::NametagMode::SLIM) {
-		if (nametag_mode == Game_Multiplayer::NametagMode::SLIM && name_text_2) {
+FontRef Font::NameText() {
+	return NameTextForMode(static_cast<int>(GMI().GetNametagMode()));
+}
+
+FontRef Font::NameTextForMode(int nametag_mode) {
+	auto mode = static_cast<Game_Multiplayer::NametagMode>(nametag_mode);
+
+	if (mode == Game_Multiplayer::NametagMode::COMPACT || mode == Game_Multiplayer::NametagMode::SLIM) {
+		if (mode == Game_Multiplayer::NametagMode::SLIM && name_text_2) {
 			return name_text_2;
 		}
 
@@ -664,6 +673,25 @@ void Font::SetNameText(FontRef new_name_text, bool slim) {
 	} else {
 		name_text_2 = new_name_text;
 	}
+}
+
+void Font::SetNameTextFallbackData(std::vector<uint8_t> data, bool slim) {
+	if (slim) {
+		name_text_slim_fallback_data = std::move(data);
+	} else {
+		name_text_fallback_data = std::move(data);
+	}
+}
+
+FontRef Font::CreateNameTextFallback(bool slim, int size) {
+	const auto& data = slim ? name_text_slim_fallback_data : name_text_fallback_data;
+	if (data.empty()) {
+		return nullptr;
+	}
+	auto* buffer = new Filesystem_Stream::InputMemoryStreamBuf(data);
+	Filesystem_Stream::InputStream stream(
+		buffer, slim ? "builtin:3x9PixelFont.ttf" : "builtin:creep2.ttf");
+	return CreateFtFont(std::move(stream), size, false, false);
 }
 
 FontRef Font::CreateFtFont(Filesystem_Stream::InputStream is, int size, bool bold, bool italic) {

@@ -20,6 +20,7 @@
 
 // Headers
 #include <string>
+#include <atomic>
 #include "audio_generic_midiout.h"
 #include "filesystem_stream.h"
 #include "audio_secache.h"
@@ -164,6 +165,8 @@ struct AudioInterface {
 
 protected:
 	Game_ConfigAudio cfg;
+	// Native MIDI reads this snapshot, never the main-thread settings object.
+	std::atomic<int> midi_global_volume;
 };
 
 struct EmptyAudio : public AudioInterface {

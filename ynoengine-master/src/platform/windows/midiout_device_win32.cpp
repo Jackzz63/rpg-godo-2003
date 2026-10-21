@@ -43,35 +43,65 @@ Win32MidiOutDevice::Win32MidiOutDevice(std::string& status_message) {
 Win32MidiOutDevice::~Win32MidiOutDevice() {
 	if (midi_out) {
 		midiOutReset(midi_out);
+		for (auto& message : pending) {
+			if (message->prepared) midiOutUnprepareHeader(midi_out, &message->header, sizeof(MIDIHDR));
+		}
+		pending.clear();
 		midiOutClose(midi_out);
 		midi_out = nullptr;
 	}
 }
 
 void Win32MidiOutDevice::SendMidiMessage(uint32_t message) {
-	midiOutShortMsg(midi_out, message);
+	if (pending.empty()) {
+		midiOutShortMsg(midi_out, message);
+		return;
+	}
+	auto item = std::make_unique<PendingMessage>();
+	item->short_message = message;
+	pending.push_back(std::move(item));
+	FlushOutput();
 }
 
 void Win32MidiOutDevice::SendSysExMessage(const uint8_t* data, size_t size) {
-	MIDIHDR hdr;
-	MMRESULT res;
-	hdr.dwBufferLength = size;
-	hdr.dwBytesRecorded = size;
-	hdr.dwFlags = 0;
-	hdr.lpData = (LPSTR) data;
-	res = midiOutPrepareHeader(midi_out, &hdr, sizeof(hdr));
-	if (res != MMSYSERR_NOERROR) {
-		Output::Debug("Win32 midiOutPrepareHeader failed: ({}) {}", res, get_error_str(res));
-		return;
+	if (size == 0) return;
+	auto item = std::make_unique<PendingMessage>();
+	item->data.assign(data, data + size);
+	pending.push_back(std::move(item));
+	FlushOutput();
+}
+
+bool Win32MidiOutDevice::FlushOutput() {
+	while (!pending.empty()) {
+		auto& item = *pending.front();
+		if (item.data.empty()) {
+			midiOutShortMsg(midi_out, item.short_message);
+		} else {
+			if (!item.prepared) {
+				item.header.lpData = reinterpret_cast<LPSTR>(item.data.data());
+				item.header.dwBufferLength = static_cast<DWORD>(item.data.size());
+				auto result = midiOutPrepareHeader(midi_out, &item.header, sizeof(MIDIHDR));
+				if (result != MMSYSERR_NOERROR) {
+					Output::Debug("Win32 midiOutPrepareHeader failed: ({}) {}", result, get_error_str(result));
+					pending.pop_front();
+					continue;
+				}
+				item.prepared = true;
+				result = midiOutLongMsg(midi_out, &item.header, sizeof(MIDIHDR));
+				if (result != MMSYSERR_NOERROR) {
+					Output::Debug("Win32 midiOutLongMsg failed: ({}) {}", result, get_error_str(result));
+				}
+			}
+			const auto result = midiOutUnprepareHeader(midi_out, &item.header, sizeof(MIDIHDR));
+			if (result == MIDIERR_STILLPLAYING) return false;
+			if (result != MMSYSERR_NOERROR) {
+				Output::Debug("Win32 midiOutUnprepareHeader failed: ({}) {}", result, get_error_str(result));
+				return false;
+			}
+		}
+		pending.pop_front();
 	}
-	res = midiOutLongMsg(midi_out, &hdr, sizeof(hdr));
-	if (res != MMSYSERR_NOERROR) {
-		Output::Debug("Win32 midiOutLongMsg failed: ({}) {}", res, get_error_str(res));
-	}
-	res = midiOutUnprepareHeader(midi_out, &hdr, sizeof(hdr));
-	if (res != MMSYSERR_NOERROR) {
-		Output::Debug("Win32 midiOutUnprepareHeader failed: ({}) {}", res, get_error_str(res));
-	}
+	return true;
 }
 
 std::string Win32MidiOutDevice::GetName() {
