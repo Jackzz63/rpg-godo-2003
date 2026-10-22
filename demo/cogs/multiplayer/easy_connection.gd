@@ -57,6 +57,7 @@ func open(uri: String) -> Error:
 	_reset_send_failure_state()
 	_url = uri
 	_socket_epoch += 1
+	clear_endpoint_dns_cache(uri)
 	_ws = WebSocketPeer.new()
 	_ws.supported_protocols = PackedStringArray(["binary"])
 	Log.info("[EasyConnection] connecting to %s" % uri)
@@ -67,6 +68,38 @@ func open(uri: String) -> Error:
 		return err
 	_is_open = false
 	return OK
+
+static func clear_endpoint_dns_cache(uri: String) -> void:
+	# Native WebSockets share a process-wide cache without network-change expiry.
+	# Release the old socket first, then let connect_to_url resolve asynchronously.
+	var host := _endpoint_dns_hostname(uri)
+	if not host.is_empty():
+		IP.clear_cache(host)
+
+
+static func _endpoint_dns_hostname(uri: String) -> String:
+	var separator := uri.find("://")
+	if separator < 0 or uri.left(separator) not in ["ws", "wss"]:
+		return ""
+	var authority := uri.substr(separator + 3).get_slice("/", 0).get_slice("?", 0).get_slice("#", 0)
+	# Literal IPs do not use the hostname cache. Never pass an empty hostname to
+	# clear_cache(), since that would clear unrelated domains as well.
+	if authority.is_empty() or authority.begins_with("[") or authority.contains("@"):
+		return ""
+	if authority.count(":") > 1:
+		return ""
+	if authority.contains(":"):
+		var port := authority.get_slice(":", 1)
+		if not port.is_valid_int() or int(port) < 1 or int(port) > 65535:
+			return ""
+	var host := authority.get_slice(":", 0)
+	if host.is_empty() or host.is_valid_ip_address():
+		return ""
+	for character in host:
+		if character.unicode_at(0) <= 32 or character in ["[", "]", "\\"]:
+			return ""
+	return host
+
 
 func close() -> void:
 	Log.debug("[EasyConnection] closing")

@@ -33,6 +33,7 @@ var _menu_label: Label
 var _return_button: Button
 var _return_confirm: ThemedDialog
 var _paused := false
+var _network_resume_pending := false
 var _was_running := false
 var _menu_content: VBoxContainer
 var _menu_frame: VBoxContainer
@@ -356,6 +357,14 @@ func _process(_delta: float) -> void:
 func _notification(what: int) -> void:
 	if not is_node_ready():
 		return
+	if what == NOTIFICATION_APPLICATION_PAUSED:
+		_network_resume_pending = true
+	elif what == NOTIFICATION_APPLICATION_RESUMED and _network_resume_pending:
+		_network_resume_pending = false
+		if is_instance_valid(launcher):
+			var connection: EasyMultiplayer = launcher.get("multiplayer_node")
+			if is_instance_valid(connection):
+				connection.notify_application_resumed()
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		handle_back()
 	elif what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT:

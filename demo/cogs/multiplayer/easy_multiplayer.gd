@@ -188,6 +188,8 @@ var _cu_player_count_seen: bool = false
 var _manual_reconnect_ready_at_msec: int = 0
 var _manual_reconnect_ready: bool = false
 var _connection_attempts: int = 0
+var _last_physical_open_msec: int = -1
+var _application_resume_generation: int = -1
 var _connection_stopped: bool = false
 var _establishing_connection: bool = false
 var _attempt_deadline_msec: int = 0
@@ -592,6 +594,10 @@ func _next_admin_request_id() -> int:
 	return _admin_request_sequence
 
 func _process(_delta: float) -> void:
+	# Android recovery applies only to this first normal network check. A healthy
+	# socket must not leave a fast-retry allowance for an unrelated later failure.
+	var resume_generation := _application_resume_generation
+	_application_resume_generation = -1
 	_refresh_current_map_id()
 	# Map ID 0 represents the title/main-menu state. The socket is closed by
 	# _suspend_for_map_zero(), and returning here ensures it cannot be polled or
@@ -601,6 +607,7 @@ func _process(_delta: float) -> void:
 	_check_attempt_deadline()
 	if _conn:
 		_conn.poll()
+	_try_application_resume_reconnect(resume_generation)
 	_check_list_query_deadlines(Time.get_ticks_msec())
 	if _session_active:
 		_update_frame()
@@ -683,6 +690,27 @@ func connect_to_room(map_id: int, room_switch: bool = false) -> void:
 			Log.debug("[EasyMultiplayer] physical connection attempt already in progress")
 			return
 		_start_physical_connection()
+
+
+func notify_application_resumed() -> void:
+	# Called only by the Android lifecycle adapter, not ordinary focus changes.
+	if _conn != null and _session_active and not _connection_stopped and _current_map_id != 0:
+		_application_resume_generation = _connection_generation
+
+
+func _try_application_resume_reconnect(resume_generation: int) -> void:
+	if (resume_generation < 0 or resume_generation != _connection_generation
+			or _conn == null or not _session_active or _connection_stopped
+			or _current_map_id == 0 or not _reconnect_waiting
+			or _connection_attempts != 0 or _last_physical_open_msec < 0):
+		return
+	# A completed session resets attempts to zero; the first new open consumes
+	# that allowance. Repeated pause/resume cannot accelerate later failures.
+	if Time.get_ticks_msec() - _last_physical_open_msec < int(RECONNECT_DELAY_SECONDS * 1000.0):
+		return
+	Log.info("[EasyMultiplayer] application resume skips the first reconnect wait")
+	_cancel_reconnect_wait()
+	_start_physical_connection()
 
 
 func request_reconnect() -> bool:
@@ -1678,6 +1706,7 @@ func _start_physical_connection() -> void:
 	_last_disconnect_reason = ""
 	Log.info("[EasyMultiplayer] opening WebSocket attempt=%d generation=%d: %s" \
 		% [_active_attempt_sequence, _active_socket_generation, url])
+	_last_physical_open_msec = Time.get_ticks_msec()
 	var open_error := _conn.open(url)
 	_socket_epoch = _conn.get_socket_epoch()
 	if open_error != OK:

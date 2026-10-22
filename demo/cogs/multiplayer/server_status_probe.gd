@@ -32,6 +32,7 @@ func refresh(endpoint: String, credential: String) -> bool:
 		return true
 	_credential = credential
 	_request_id = Crypto.new().generate_random_bytes(16).hex_encode()
+	EasyConnection.clear_endpoint_dns_cache(url)
 	_ws = WebSocketPeer.new()
 	_ws.supported_protocols = PackedStringArray([Protocol.SUBPROTOCOL])
 	_ws.inbound_buffer_size = 4096
